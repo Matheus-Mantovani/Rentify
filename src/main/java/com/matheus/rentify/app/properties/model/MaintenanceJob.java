@@ -41,5 +41,5 @@ public class MaintenanceJob {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private MaintenanceStatus status;
+    private MaintenanceStatusEnum status;
 }

@@ -36,6 +36,10 @@ public class Property {
     @JoinColumn(name = "city_fk")
     private City city;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private PropertyStatusEnum status;
+
     @Column(name = "condo_fee", precision = 10, scale = 2)
     private BigDecimal condoFee;
 

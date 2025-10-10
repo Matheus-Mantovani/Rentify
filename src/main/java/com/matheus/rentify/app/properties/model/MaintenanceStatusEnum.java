@@ -1,6 +1,6 @@
 package com.matheus.rentify.app.properties.model;
 
-public enum MaintenanceStatus {
+public enum MaintenanceStatusEnum {
     PENDING("Pending"),
     IN_PROGRESS("In progress"),
     COMPLETED("Completed"),
@@ -8,7 +8,7 @@ public enum MaintenanceStatus {
 
     private final String name;
 
-    MaintenanceStatus(String name) {
+    MaintenanceStatusEnum(String name) {
         this.name = name;
     }
 
