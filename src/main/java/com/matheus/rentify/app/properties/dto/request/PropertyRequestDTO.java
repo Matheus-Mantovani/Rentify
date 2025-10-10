@@ -25,7 +25,7 @@ public record PropertyRequestDTO(
         @Size(max = 100, message = "Address complement cannot exceed 100 characters.")
         String addressComplement,
 
-        @Schema(description = "Neighborhood where the property is located.", example = "Downtown", requiredMode = Schema.RequiredMode.REQUIRED)
+        @Schema(description = "Neighborhood where the property is located.", example = "Downtown")
         @Size(max = 100, message = "Neighborhood cannot exceed 100 characters.")
         String neighborhood,
 
@@ -41,6 +41,10 @@ public record PropertyRequestDTO(
         @Schema(description = "Current status of the property.", example = "AVAILABLE", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "Status cannot be null.")
         PropertyStatusEnum status,
+
+        @Schema(description = "Current market value of the property. Cannot be negative.", example = "450000.00")
+        @PositiveOrZero(message = "Market value must be a positive value or zero.")
+        BigDecimal currentMarketValue,
 
         @Schema(description = "Monthly condo fee value, if applicable. Cannot be negative.", example = "350.50")
         @PositiveOrZero(message = "Condo fee must be a positive value or zero.")

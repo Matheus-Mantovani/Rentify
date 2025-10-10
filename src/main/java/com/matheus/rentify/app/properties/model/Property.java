@@ -40,6 +40,9 @@ public class Property {
     @Column(name = "status", nullable = false)
     private PropertyStatusEnum status;
 
+    @Column(name = "current_market_value", precision = 10, scale = 2)
+    private BigDecimal currentMarketValue;
+
     @Column(name = "condo_fee", precision = 10, scale = 2)
     private BigDecimal condoFee;
 
