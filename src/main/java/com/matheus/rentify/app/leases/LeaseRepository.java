@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface LeaseRepository extends JpaRepository<Lease, Long> {
+    boolean existsByPropertyId(Long id);
 }

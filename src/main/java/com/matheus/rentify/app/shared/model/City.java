@@ -18,7 +18,7 @@ public class City {
     private Long id;
 
     @Column(name = "city_name", length = 100)
-    private String stateName;
+    private String cityName;
 
     @ManyToOne
     @JoinColumn(name = "state_fk")

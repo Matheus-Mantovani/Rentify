@@ -3,7 +3,7 @@ package com.matheus.rentify.app.properties.model;
 public enum PropertyStatusEnum {
     AVAILABLE("Available"),
     RENTED("Rented"),
-    UNDER_MAINTENCE("Under maintence"),
+    UNDER_MAINTENANCE("Under maintenance"),
     INACTIVE("Inactive");
 
     private final String name;
