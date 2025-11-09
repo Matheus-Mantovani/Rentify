@@ -1,4 +1,4 @@
-package com.matheus.rentify.app.properties;
+package com.matheus.rentify.app.properties.repository;
 
 import com.matheus.rentify.app.properties.model.MaintenanceJob;
 import org.springframework.data.jpa.repository.JpaRepository;

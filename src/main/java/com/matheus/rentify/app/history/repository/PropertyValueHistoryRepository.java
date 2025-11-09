@@ -1,4 +1,4 @@
-package com.matheus.rentify.app.history;
+package com.matheus.rentify.app.history.repository;
 
 import com.matheus.rentify.app.history.model.PropertyValueHistory;
 import org.springframework.data.jpa.repository.JpaRepository;

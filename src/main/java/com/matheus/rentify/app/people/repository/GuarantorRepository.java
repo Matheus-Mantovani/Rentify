@@ -1,4 +1,4 @@
-package com.matheus.rentify.app.people;
+package com.matheus.rentify.app.people.repository;
 
 import com.matheus.rentify.app.people.model.Guarantor;
 import org.springframework.data.jpa.repository.JpaRepository;
