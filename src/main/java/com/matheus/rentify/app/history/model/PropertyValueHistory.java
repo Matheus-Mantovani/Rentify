@@ -2,16 +2,16 @@ package com.matheus.rentify.app.history.model;
 
 import com.matheus.rentify.app.properties.model.Property;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity
-@Data
 @Table(name = "property_value_history")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class PropertyValueHistory {

@@ -3,17 +3,16 @@ package com.matheus.rentify.app.history.model;
 import com.matheus.rentify.app.people.model.Tenant;
 import com.matheus.rentify.app.properties.model.Property;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Data
 @Table(name = "leases_history")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class LeaseHistory {
