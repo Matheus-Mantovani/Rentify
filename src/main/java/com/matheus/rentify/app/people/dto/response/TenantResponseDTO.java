@@ -24,7 +24,7 @@ public record TenantResponseDTO(
         @Schema(description = "Tenant's profession.", example = "Software Engineer")
         String profession,
 
-        @Schema(description = "Tenant's marital status.", example = "MARRIED")
+        @Schema(description = "Tenant's marital status.", example = "Married")
         MaritalStatusEnum maritalStatus,
 
         @Schema(description = "Name of the tenant's city of residence.", example = "Araraquara")
