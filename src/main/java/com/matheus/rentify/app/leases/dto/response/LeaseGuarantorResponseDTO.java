@@ -30,8 +30,8 @@ public record LeaseGuarantorResponseDTO(
         @JsonFormat(pattern = "dd-MM-yyyy")
         LocalDate signatureDate,
 
-        @Schema(description = "Lifecycle status of this guarantee.", example = "Active")
-        LeaseGuarantorStatusEnum status,
+        @Schema(description = "Lifecycle status of this guarantee.", example = "ACTIVE")
+        LeaseGuarantorStatusEnum leaseGuarantorStatus,
 
         @Schema(description = "Monetary value associated with the guarantee, if applicable.", example = "5000.00")
         BigDecimal guaranteeValue,

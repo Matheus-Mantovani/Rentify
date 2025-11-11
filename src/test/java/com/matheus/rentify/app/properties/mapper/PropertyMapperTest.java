@@ -11,7 +11,7 @@ import com.matheus.rentify.app.shared.repository.CityRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mapstruct.factory.Mappers;
 
@@ -24,9 +24,9 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class PropertyMapperTest {
 
+    @Mock
     private CityRepository cityRepository;
 
-    @InjectMocks
     private PropertyMapper propertyMapper = Mappers.getMapper(PropertyMapper.class);
 
     private City mockCity;
@@ -36,6 +36,8 @@ class PropertyMapperTest {
     void initEntities() {
         mockState = new State(1L, "SP", "São Paulo");
         mockCity = new City(487L, "Araraquara", mockState);
+
+        propertyMapper.cityRepository = this.cityRepository;
     }
 
 
@@ -43,8 +45,11 @@ class PropertyMapperTest {
     void shouldMapPropertyRequestDTOToPropertyEntity() {
         PropertyRequestDTO dto = new PropertyRequestDTO(
                 "Rua Teste, 123", null, "Centro", "14800000",
-                mockCity.getId(), PropertyStatusEnum.AVAILABLE, BigDecimal.valueOf(100),
-                BigDecimal.valueOf(500), BigDecimal.valueOf(1000), "Reg123", "Notes test"
+                mockCity.getId(), PropertyStatusEnum.AVAILABLE,
+                BigDecimal.valueOf(200000),
+                BigDecimal.valueOf(100),
+                BigDecimal.valueOf(500),
+                "Reg123", "Notes test"
         );
 
         when(cityRepository.findById(mockCity.getId())).thenReturn(Optional.of(mockCity));
@@ -57,6 +62,7 @@ class PropertyMapperTest {
         assertThat(entity.getNeighborhood()).isEqualTo(dto.neighborhood());
         assertThat(entity.getPostalCode()).isEqualTo(dto.postalCode());
         assertThat(entity.getStatus()).isEqualTo(dto.status());
+        assertThat(entity.getCurrentMarketValue()).isEqualTo(dto.currentMarketValue());
         assertThat(entity.getCondoFee()).isEqualTo(dto.condoFee());
         assertThat(entity.getPropertyTaxValue()).isEqualTo(dto.propertyTaxValue());
         assertThat(entity.getRegistrationNumber()).isEqualTo(dto.registrationNumber());
@@ -137,7 +143,10 @@ class PropertyMapperTest {
         PropertyRequestDTO updateDto = new PropertyRequestDTO(
                 "Novo Endereço", "Comp", "Novo Bairro", "12345678",
                 mockCity.getId(),
-                PropertyStatusEnum.UNDER_MAINTENANCE, BigDecimal.valueOf(150), BigDecimal.valueOf(600), BigDecimal.valueOf(1000),
+                PropertyStatusEnum.UNDER_MAINTENANCE,
+                BigDecimal.valueOf(210000),
+                BigDecimal.valueOf(150),
+                BigDecimal.valueOf(600),
                 "RegNovo", "Nova Nota"
         );
 

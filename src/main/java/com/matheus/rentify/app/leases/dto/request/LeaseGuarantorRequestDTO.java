@@ -34,7 +34,7 @@ public record LeaseGuarantorRequestDTO(
 
         @Schema(description = "Lifecycle status of this guarantee.", example = "ACTIVE", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "Status cannot be null.")
-        LeaseGuarantorStatusEnum status,
+        LeaseGuarantorStatusEnum leaseGuarantorStatus,
 
         @Schema(description = "Monetary value, used for types like 'Security Deposit'.", example = "5000.00")
         @PositiveOrZero(message = "Guarantee value must be a positive value or zero.")

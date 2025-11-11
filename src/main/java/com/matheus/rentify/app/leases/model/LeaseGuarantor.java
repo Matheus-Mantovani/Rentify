@@ -36,7 +36,7 @@ public class LeaseGuarantor {
     private LocalDate signatureDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "lease_guarantor_status", nullable = false)
     private LeaseGuarantorStatusEnum leaseGuarantorStatus;
 
     @Column(name = "guarantee_value", precision = 10, scale = 2)
