@@ -40,6 +40,6 @@ public record MaintenanceJobResponseDTO(
         String serviceProvider,
 
         @Schema(description = "Current status of the maintenance job.", example = "Completed")
-        MaintenanceStatusEnum status
+        MaintenanceStatusEnum maintenanceStatus
 ) {
 }

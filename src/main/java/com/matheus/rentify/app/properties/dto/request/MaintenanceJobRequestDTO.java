@@ -40,6 +40,6 @@ public record MaintenanceJobRequestDTO(
 
         @Schema(description = "Current status of the maintenance job.", example = "PENDING", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "Status cannot be null.")
-        MaintenanceStatusEnum status
+        MaintenanceStatusEnum maintenanceStatus
 ) {
 }

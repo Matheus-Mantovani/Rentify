@@ -39,6 +39,6 @@ public class MaintenanceJob {
     private String serviceProvider;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private MaintenanceStatusEnum status;
+    @Column(name = "maintenance_status", nullable = false)
+    private MaintenanceStatusEnum maintenanceStatus;
 }
