@@ -71,5 +71,5 @@ public class LeaseHistory {
     private String moveOutReason;
 
     @Column(name = "archived_at", nullable = false)
-    private LocalDateTime archievedAt;
+    private LocalDateTime archivedAt;
 }

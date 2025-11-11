@@ -43,24 +43,13 @@ public record LeaseRequestDTO(
         @Positive(message = "Base rent value must be positive.")
         BigDecimal baseRentValue,
 
-        @Schema(description = "Rent value written in words, for legal documents.", example = "Two thousand, two hundred reais and fifty cents")
-        @Size(max = 255)
-        String rentValueInWords,
-
         @Schema(description = "Value of the security deposit, if any. Cannot be negative.", example = "4401.00")
         @PositiveOrZero(message = "Security deposit must be a positive value or zero.")
         BigDecimal securityDepositValue,
 
-        @Schema(description = "Security deposit value in words.", example = "Four thousand, four hundred and one reais")
-        @Size(max = 255)
-        String depositValueInWords,
-
         @Schema(description = "Value of the painting fee, if any. Cannot be negative.", example = "1000.00")
         @PositiveOrZero(message = "Painting fee must be a positive value or zero.")
-        BigDecimal paintingFeeValue,
+        BigDecimal paintingFeeValue
 
-        @Schema(description = "Painting fee value in words.", example = "One thousand reais")
-        @Size(max = 255)
-        String paintingFeeInWords
 ) {
 }
