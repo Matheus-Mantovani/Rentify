@@ -1,6 +1,7 @@
 package com.matheus.rentify.app.shared.util;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 
@@ -10,6 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Test class for the {@link MonetaryConverter} utility.
  * Validates the conversion of BigDecimal values into their written-out form in Portuguese.
  */
+@ActiveProfiles("test")
 class MonetaryConverterTest {
 
     @Test

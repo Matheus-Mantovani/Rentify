@@ -28,7 +28,7 @@ public class Property {
     @Column(name = "neighborhood", length = 100)
     private String neighborhood;
 
-    @Column(name = "postal_code", length = 8, nullable = false, columnDefinition = "CHAR")
+    @Column(name = "postal_code", nullable = false, columnDefinition = "CHAR(8)")
     private String postalCode;
 
     @ManyToOne

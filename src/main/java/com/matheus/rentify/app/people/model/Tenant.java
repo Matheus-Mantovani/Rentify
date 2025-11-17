@@ -20,7 +20,7 @@ public class Tenant {
     @Column(name = "full_name", length = 255, nullable = false)
     private String fullName;
 
-    @Column(name = "cpf", length = 11, nullable = false, unique = true, columnDefinition = "CHAR")
+    @Column(name = "cpf", nullable = false, unique = true, columnDefinition = "CHAR(11)")
     private String cpf;
 
     @Column(name = "rg", length = 20)
