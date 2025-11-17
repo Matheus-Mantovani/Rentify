@@ -16,7 +16,7 @@ public class State {
     @Column(name = "state_id", nullable = false)
     private Long id;
 
-    @Column(name = "state_code", length = 2, nullable = false, unique = true, columnDefinition = "CHAR")
+    @Column(name = "state_code", nullable = false, unique = true, columnDefinition = "CHAR(2)")
     private String stateCode;
 
     @Column(name = "state_name", length = 50)
