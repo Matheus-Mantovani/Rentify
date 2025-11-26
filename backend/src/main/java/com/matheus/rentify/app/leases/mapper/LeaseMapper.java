@@ -1,6 +1,5 @@
 package com.matheus.rentify.app.leases.mapper;
 
-import com.matheus.rentify.app.history.model.LeaseHistory;
 import com.matheus.rentify.app.leases.dto.request.LeaseRequestDTO;
 import com.matheus.rentify.app.leases.dto.request.LeaseTerminationRequestDTO;
 import com.matheus.rentify.app.leases.dto.response.LeaseResponseDTO;
@@ -32,6 +31,10 @@ public abstract class LeaseMapper {
             @Mapping(target = "rentValueInWords", ignore = true),
             @Mapping(target = "depositValueInWords", ignore = true),
             @Mapping(target = "paintingFeeInWords", ignore = true),
+            @Mapping(target = "status", ignore = true),
+            @Mapping(target = "moveOutDate", ignore = true),
+            @Mapping(target = "moveOutCondition", ignore = true),
+            @Mapping(target = "moveOutReason", ignore = true),
             @Mapping(target = "property", source = "propertyId"),
             @Mapping(target = "tenant", source = "tenantId")
     })
@@ -44,16 +47,32 @@ public abstract class LeaseMapper {
             @Mapping(target = "rentValueInWords", ignore = true),
             @Mapping(target = "depositValueInWords", ignore = true),
             @Mapping(target = "paintingFeeInWords", ignore = true),
+            @Mapping(target = "status", ignore = true),
+            @Mapping(target = "moveOutDate", ignore = true),
+            @Mapping(target = "moveOutCondition", ignore = true),
+            @Mapping(target = "moveOutReason", ignore = true),
             @Mapping(target = "property", source = "propertyId"),
             @Mapping(target = "tenant", source = "tenantId")
     })
     public abstract void updateEntityFromDto(LeaseRequestDTO dto, @MappingTarget Lease entity);
 
     @Mappings({
+            @Mapping(target = "status", constant = "TERMINATED"),
             @Mapping(target = "id", ignore = true),
-            @Mapping(target = "archivedAt", ignore = true)
+            @Mapping(target = "property", ignore = true),
+            @Mapping(target = "tenant", ignore = true),
+            @Mapping(target = "landlordName", ignore = true),
+            @Mapping(target = "paymentDueDay", ignore = true),
+            @Mapping(target = "startDate", ignore = true),
+            @Mapping(target = "endDate", ignore = true),
+            @Mapping(target = "baseRentValue", ignore = true),
+            @Mapping(target = "securityDepositValue", ignore = true),
+            @Mapping(target = "paintingFeeValue", ignore = true),
+            @Mapping(target = "rentValueInWords", ignore = true),
+            @Mapping(target = "depositValueInWords", ignore = true),
+            @Mapping(target = "paintingFeeInWords", ignore = true)
     })
-    public abstract LeaseHistory toLeaseHistory(LeaseTerminationRequestDTO terminationDTO, Lease lease);
+    public abstract void terminateLease(LeaseTerminationRequestDTO dto, @MappingTarget Lease entity);
 
     protected Property propertyIdToProperty(Long propertyId) {
         if(propertyId == null) {

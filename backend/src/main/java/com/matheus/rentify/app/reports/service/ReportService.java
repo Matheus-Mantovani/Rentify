@@ -1,6 +1,7 @@
 package com.matheus.rentify.app.reports.service;
 
 import com.matheus.rentify.app.leases.model.Lease;
+import com.matheus.rentify.app.leases.model.LeaseStatusEnum;
 import com.matheus.rentify.app.leases.repository.LeaseRepository;
 import com.matheus.rentify.app.leases.repository.PaymentRepository;
 import com.matheus.rentify.app.properties.model.MaintenanceStatusEnum;
@@ -127,11 +128,16 @@ public class ReportService {
         LocalDate today = LocalDate.now();
         LocalDate thresholdDate = today.plusDays(daysThreshold);
 
-        List<Lease> expiringLeases = leaseRepository.findByEndDateBetween(today, thresholdDate);
+        List<Lease> leases = leaseRepository.findByEndDateBetweenAndStatus(
+                today,
+                thresholdDate,
+                LeaseStatusEnum.ACTIVE
+        );
 
-        return expiringLeases.stream()
+        return leases.stream()
                 .map(lease -> {
                     long daysRemaining = ChronoUnit.DAYS.between(today, lease.getEndDate());
+
                     return new ExpiringLeaseResponseDTO(
                             lease.getId(),
                             lease.getProperty().getAddress(),
@@ -140,13 +146,13 @@ public class ReportService {
                             daysRemaining
                     );
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public List<LatePaymentResponseDTO> getLatePayments(int referenceMonth, int referenceYear) {
         LocalDate today = LocalDate.now();
-        List<Lease> activeLeases = leaseRepository.findAllActiveLeases(today);
+        List<Lease> activeLeases = leaseRepository.findAllByStatus(LeaseStatusEnum.ACTIVE);
         List<Long> paidLeaseIds = paymentRepository.findLeaseIdsWithPaymentInMonth(referenceMonth, referenceYear);
 
         Set<Long> paidLeaseIdsSet = new HashSet<>(paidLeaseIds);

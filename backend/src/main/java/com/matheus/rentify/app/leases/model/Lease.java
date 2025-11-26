@@ -58,4 +58,18 @@ public class Lease {
 
     @Column(name = "painting_fee_in_words", length = 255)
     private String paintingFeeInWords;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private LeaseStatusEnum status = LeaseStatusEnum.ACTIVE;
+
+    @Column(name = "move_out_date")
+    private LocalDate moveOutDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "move_out_condition")
+    private MoveOutConditionEnum moveOutCondition;
+
+    @Column(name = "move_out_reason")
+    private String moveOutReason;
 }

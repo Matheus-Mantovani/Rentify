@@ -1,9 +1,15 @@
 package com.matheus.rentify.app.leases.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.matheus.rentify.app.leases.model.LeaseStatusEnum;
+import com.matheus.rentify.app.leases.model.MoveOutConditionEnum;
 import com.matheus.rentify.app.people.dto.response.TenantResponseDTO;
 import com.matheus.rentify.app.properties.dto.response.PropertyResponseDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -16,6 +22,9 @@ public record LeaseResponseDTO(
 
         @Schema(description = "Unique identifier of the lease contract.", example = "15")
         Long id,
+
+        @Schema(description = "Status of the lease", example = "ACTIVE")
+        LeaseStatusEnum status,
 
         @Schema(description = "Details of the leased property.")
         PropertyResponseDTO property,
@@ -53,6 +62,16 @@ public record LeaseResponseDTO(
         String depositValueInWords,
 
         @Schema(description = "Painting fee value written in words.", example = "One thousand reais")
-        String paintingFeeInWords
+        String paintingFeeInWords,
+
+        @Schema(description = "Date the tenant moved out.", example = "31-10-2024")
+        @JsonFormat(pattern = "dd-MM-yyyy")
+        LocalDate moveOutDate,
+
+        @Schema(description = "Condition of the property upon move-out.", example = "GOOD")
+        MoveOutConditionEnum moveOutCondition,
+
+        @Schema(description = "Reason for the tenant moving out.", example = "End of contract")
+        String moveOutReason
 ) {
 }

@@ -3,6 +3,7 @@ package com.matheus.rentify.app.leases.controller;
 import com.matheus.rentify.app.leases.dto.request.LeaseRequestDTO;
 import com.matheus.rentify.app.leases.dto.request.LeaseTerminationRequestDTO;
 import com.matheus.rentify.app.leases.dto.response.LeaseResponseDTO;
+import com.matheus.rentify.app.leases.model.LeaseStatusEnum;
 import com.matheus.rentify.app.leases.service.LeaseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,9 +43,9 @@ public class LeaseController {
     }
 
     @GetMapping
-    @Operation(summary = "Get all active leases")
-    public ResponseEntity<List<LeaseResponseDTO>> getAllLeases() {
-        List<LeaseResponseDTO> leases = leaseService.getAllLeases();
+    @Operation(summary = "Get all leases optionally filtered by status")
+    public ResponseEntity<List<LeaseResponseDTO>> getAllLeasesByStatus(@RequestParam(required = false) LeaseStatusEnum status) {
+        List<LeaseResponseDTO> leases = leaseService.getAll(status);
         return ResponseEntity.ok(leases);
     }
 

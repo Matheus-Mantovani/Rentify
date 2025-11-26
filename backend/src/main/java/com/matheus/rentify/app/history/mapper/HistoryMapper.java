@@ -1,9 +1,7 @@
 package com.matheus.rentify.app.history.mapper;
 
-import com.matheus.rentify.app.history.dto.response.LeaseHistoryResponseDTO;
 import com.matheus.rentify.app.history.dto.response.PropertyFinancialsHistoryResponseDTO;
 import com.matheus.rentify.app.history.dto.response.PropertyValueHistoryResponseDTO;
-import com.matheus.rentify.app.history.model.LeaseHistory;
 import com.matheus.rentify.app.history.model.PropertyFinancialsHistory;
 import com.matheus.rentify.app.history.model.PropertyValueHistory;
 import com.matheus.rentify.app.people.mapper.TenantMapper;
@@ -14,8 +12,6 @@ import org.mapstruct.Mappings;
 
 @Mapper(componentModel = "spring", uses = {PropertyMapper.class, TenantMapper.class})
 public interface HistoryMapper {
-
-    LeaseHistoryResponseDTO toLeaseHistoryResponseDTO(LeaseHistory history);
 
     @Mappings({
             @Mapping(target = "propertyId", source = "history.property.id"),

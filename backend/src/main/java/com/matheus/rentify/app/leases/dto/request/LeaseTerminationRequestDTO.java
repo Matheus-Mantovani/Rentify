@@ -1,6 +1,6 @@
 package com.matheus.rentify.app.leases.dto.request;
 
-import com.matheus.rentify.app.history.model.MoveOutConditionEnum;
+import com.matheus.rentify.app.leases.model.MoveOutConditionEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

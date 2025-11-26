@@ -1,11 +1,11 @@
 package com.matheus.rentify.app.leases.service;
 
-import com.matheus.rentify.app.history.model.MoveOutConditionEnum;
-import com.matheus.rentify.app.history.repository.LeaseHistoryRepository;
 import com.matheus.rentify.app.leases.dto.request.LeaseRequestDTO;
 import com.matheus.rentify.app.leases.dto.request.LeaseTerminationRequestDTO;
 import com.matheus.rentify.app.leases.dto.response.LeaseResponseDTO;
 import com.matheus.rentify.app.leases.model.Lease;
+import com.matheus.rentify.app.leases.model.LeaseStatusEnum;
+import com.matheus.rentify.app.leases.model.MoveOutConditionEnum;
 import com.matheus.rentify.app.leases.repository.LeaseRepository;
 import com.matheus.rentify.app.people.model.Tenant;
 import com.matheus.rentify.app.people.repository.TenantRepository;
@@ -41,9 +41,6 @@ class LeaseServiceTest {
     private LeaseRepository leaseRepository;
 
     @Autowired
-    private LeaseHistoryRepository leaseHistoryRepository;
-
-    @Autowired
     private PropertyRepository propertyRepository;
 
     @Autowired
@@ -63,7 +60,6 @@ class LeaseServiceTest {
     @BeforeEach
     void setUp() {
         leaseRepository.deleteAll();
-        leaseHistoryRepository.deleteAll();
         propertyRepository.deleteAll();
         tenantRepository.deleteAll();
 
@@ -103,6 +99,8 @@ class LeaseServiceTest {
         LeaseResponseDTO createdDto = leaseService.createLease(requestDTO);
 
         assertThat(createdDto.id()).isNotNull();
+        assertThat(createdDto.status()).isEqualTo(LeaseStatusEnum.ACTIVE);
+
         assertThat(leaseRepository.findById(createdDto.id())).isPresent();
 
         Property updatedProperty = propertyRepository.findById(testProperty.getId()).get();
@@ -128,7 +126,7 @@ class LeaseServiceTest {
     }
 
     @Test
-    void terminateAndArchiveLease_ShouldMoveLeaseToHistory_andSetPropertyAvailable() {
+    void terminateAndArchiveLease_ShouldUpdateLeaseStatusToTerminated_andSetPropertyAvailable() {
         Lease lease = new Lease();
         lease.setProperty(testProperty);
         lease.setTenant(testTenant);
@@ -146,9 +144,12 @@ class LeaseServiceTest {
 
         leaseService.terminateAndArchiveLease(activeLease.getId(), terminationDTO);
 
-        assertThat(leaseRepository.findById(activeLease.getId())).isEmpty();
-        assertThat(leaseHistoryRepository.count()).isEqualTo(1);
-        assertThat(leaseHistoryRepository.findAll().get(0).getMoveOutReason()).isEqualTo("End of contract");
+        Lease terminatedLease = leaseRepository.findById(activeLease.getId()).orElseThrow();
+
+        assertThat(terminatedLease.getStatus()).isEqualTo(LeaseStatusEnum.TERMINATED);
+        assertThat(terminatedLease.getMoveOutReason()).isEqualTo("End of contract");
+        assertThat(terminatedLease.getMoveOutCondition()).isEqualTo(MoveOutConditionEnum.GOOD);
+        assertThat(terminatedLease.getMoveOutDate()).isEqualTo(LocalDate.now());
 
         Property updatedProperty = propertyRepository.findById(testProperty.getId()).get();
         assertThat(updatedProperty.getStatus()).isEqualTo(PropertyStatusEnum.AVAILABLE);
@@ -173,7 +174,8 @@ class LeaseServiceTest {
 
         leaseService.terminateAndArchiveLease(activeLease.getId(), terminationDTO);
 
-        assertThat(leaseHistoryRepository.count()).isEqualTo(1);
+        Lease terminatedLease = leaseRepository.findById(activeLease.getId()).orElseThrow();
+        assertThat(terminatedLease.getStatus()).isEqualTo(LeaseStatusEnum.TERMINATED);
 
         Property updatedProperty = propertyRepository.findById(testProperty.getId()).get();
         assertThat(updatedProperty.getStatus()).isEqualTo(PropertyStatusEnum.UNDER_MAINTENANCE);

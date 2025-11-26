@@ -1,4 +1,4 @@
-package com.matheus.rentify.app.history.model;
+package com.matheus.rentify.app.leases.model;
 
 public enum MoveOutConditionEnum {
     EXCELLENT,

@@ -1,13 +1,10 @@
 package com.matheus.rentify.app.history.service;
 
-import com.matheus.rentify.app.history.dto.response.LeaseHistoryResponseDTO;
 import com.matheus.rentify.app.history.dto.response.PropertyFinancialsHistoryResponseDTO;
 import com.matheus.rentify.app.history.dto.response.PropertyValueHistoryResponseDTO;
 import com.matheus.rentify.app.history.mapper.HistoryMapper;
-import com.matheus.rentify.app.history.model.LeaseHistory;
 import com.matheus.rentify.app.history.model.PropertyFinancialsHistory;
 import com.matheus.rentify.app.history.model.PropertyValueHistory;
-import com.matheus.rentify.app.history.repository.LeaseHistoryRepository;
 import com.matheus.rentify.app.history.repository.PropertyFinancialsHistoryRepository;
 import com.matheus.rentify.app.history.repository.PropertyValueHistoryRepository;
 import com.matheus.rentify.app.properties.repository.PropertyRepository;
@@ -21,27 +18,17 @@ import java.util.List;
 @Service
 public class HistoryService {
 
-    private final LeaseHistoryRepository leaseHistoryRepository;
     private final PropertyValueHistoryRepository propertyValueHistoryRepository;
     private final PropertyFinancialsHistoryRepository propertyFinancialsHistoryRepository;
     private final PropertyRepository propertyRepository;
     private final HistoryMapper historyMapper;
 
     @Autowired
-    public HistoryService(LeaseHistoryRepository leaseHistoryRepository, PropertyValueHistoryRepository propertyValueHistoryRepository, PropertyFinancialsHistoryRepository propertyFinancialsHistoryRepository, PropertyRepository propertyRepository, HistoryMapper historyMapper) {
-        this.leaseHistoryRepository = leaseHistoryRepository;
+    public HistoryService(PropertyValueHistoryRepository propertyValueHistoryRepository, PropertyFinancialsHistoryRepository propertyFinancialsHistoryRepository, PropertyRepository propertyRepository, HistoryMapper historyMapper) {
         this.propertyValueHistoryRepository = propertyValueHistoryRepository;
         this.propertyFinancialsHistoryRepository = propertyFinancialsHistoryRepository;
         this.propertyRepository = propertyRepository;
         this.historyMapper = historyMapper;
-    }
-
-    @Transactional(readOnly = true)
-    public List<LeaseHistoryResponseDTO> getArchivedLeases() {
-        List<LeaseHistory> leases = leaseHistoryRepository.findAll();
-        return leases.stream()
-                .map(historyMapper::toLeaseHistoryResponseDTO)
-                .toList();
     }
 
     @Transactional(readOnly = true)

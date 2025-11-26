@@ -1,8 +1,7 @@
 package com.matheus.rentify.app.leases.service;
 
-import com.matheus.rentify.app.history.model.LeaseHistory;
-import com.matheus.rentify.app.history.model.MoveOutConditionEnum;
-import com.matheus.rentify.app.history.repository.LeaseHistoryRepository;
+import com.matheus.rentify.app.leases.model.LeaseStatusEnum;
+import com.matheus.rentify.app.leases.model.MoveOutConditionEnum;
 import com.matheus.rentify.app.leases.dto.request.LeaseRequestDTO;
 import com.matheus.rentify.app.leases.dto.request.LeaseTerminationRequestDTO;
 import com.matheus.rentify.app.leases.dto.response.LeaseResponseDTO;
@@ -12,29 +11,29 @@ import com.matheus.rentify.app.leases.repository.LeaseRepository;
 import com.matheus.rentify.app.properties.model.Property;
 import com.matheus.rentify.app.properties.model.PropertyStatusEnum;
 import com.matheus.rentify.app.properties.repository.PropertyRepository;
+import com.matheus.rentify.app.reports.dto.response.ExpiringLeaseResponseDTO;
 import com.matheus.rentify.app.shared.util.MonetaryConverter;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class LeaseService {
 
     private final LeaseRepository leaseRepository;
     private final PropertyRepository propertyRepository;
-    private final LeaseHistoryRepository leaseHistoryRepository;
     private final LeaseMapper leaseMapper;
 
     @Autowired
-    public LeaseService(LeaseRepository leaseRepository, PropertyRepository propertyRepository, LeaseHistoryRepository leaseHistoryRepository, LeaseMapper leaseMapper) {
+    public LeaseService(LeaseRepository leaseRepository, PropertyRepository propertyRepository, LeaseMapper leaseMapper) {
         this.leaseRepository = leaseRepository;
         this.propertyRepository = propertyRepository;
-        this.leaseHistoryRepository = leaseHistoryRepository;
         this.leaseMapper = leaseMapper;
     }
 
@@ -57,13 +56,17 @@ public class LeaseService {
     }
 
     @Transactional(readOnly = true)
-    public List<LeaseResponseDTO> getAllLeases() {
-        List<Lease> leases = leaseRepository.findAll();
+    public List<LeaseResponseDTO> getAll(LeaseStatusEnum status) {
+        List<Lease> leases;
+        if(status != null) {
+            leases = leaseRepository.findAllByStatus(status);
+        } else {
+            leases = leaseRepository.findAll();
+        }
         return leases.stream()
                 .map(leaseMapper::toResponseDTO)
                 .toList();
     }
-
 
     @Transactional(readOnly = true)
     public LeaseResponseDTO getLeaseById(Long id) {
@@ -88,20 +91,21 @@ public class LeaseService {
     public void terminateAndArchiveLease(Long leaseId, LeaseTerminationRequestDTO requestDTO) {
         Lease lease = findLeaseByIdOrThrow(leaseId);
 
-        LeaseHistory historyRecord = leaseMapper.toLeaseHistory(requestDTO, lease);
-        historyRecord.setArchivedAt(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")));
+        if (lease.getStatus() == LeaseStatusEnum.TERMINATED) {
+            throw new IllegalStateException("Lease already terminated");
+        }
 
-        Property property = findPropertyByIdOrThrow(lease.getProperty().getId());
-
+        Property property = lease.getProperty();
         if(requestDTO.moveOutCondition() == MoveOutConditionEnum.NEEDS_REPAIRS) {
             property.setStatus(PropertyStatusEnum.UNDER_MAINTENANCE);
         } else {
             property.setStatus(PropertyStatusEnum.AVAILABLE);
         }
-
         propertyRepository.save(property);
-        leaseHistoryRepository.save(historyRecord);
-        leaseRepository.delete(lease);
+
+        leaseMapper.terminateLease(requestDTO, lease);
+
+        leaseRepository.save(lease);
     }
 
     private Lease findLeaseByIdOrThrow(Long id) {

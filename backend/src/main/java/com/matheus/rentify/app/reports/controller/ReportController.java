@@ -37,11 +37,12 @@ public class ReportController {
     }
 
     @GetMapping("/leases/expiring")
-    @Operation(summary = "Get leases expiring within the next X days")
+    @Operation(summary = "Get active leases expiring within the next X days")
     public ResponseEntity<List<ExpiringLeaseResponseDTO>> getExpiringLeases(
-            @RequestParam(defaultValue = "30") int days
+            @RequestParam(required = false, defaultValue = "30") int days
     ) {
-        return ResponseEntity.ok(reportService.getExpiringLeases(days));
+        List<ExpiringLeaseResponseDTO> expiringLeases = reportService.getExpiringLeases(days);
+        return ResponseEntity.ok(expiringLeases);
     }
 
     @GetMapping("/late-payments")

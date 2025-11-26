@@ -1,9 +1,9 @@
 package com.matheus.rentify.app.history.controller;
 
-import com.matheus.rentify.app.history.dto.response.LeaseHistoryResponseDTO;
 import com.matheus.rentify.app.history.dto.response.PropertyFinancialsHistoryResponseDTO;
 import com.matheus.rentify.app.history.dto.response.PropertyValueHistoryResponseDTO;
 import com.matheus.rentify.app.history.service.HistoryService;
+import com.matheus.rentify.app.leases.dto.response.LeaseResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +25,6 @@ public class HistoryController {
     @Autowired
     public HistoryController(HistoryService historyService) {
         this.historyService = historyService;
-    }
-
-    @GetMapping("/leases")
-    @Operation(summary = "Get all archived leases")
-    public ResponseEntity<List<LeaseHistoryResponseDTO>> getArchivedLeases() {
-        List<LeaseHistoryResponseDTO> leases = historyService.getArchivedLeases();
-        return ResponseEntity.ok(leases);
     }
 
     @GetMapping("/properties/{id}/valuations")
