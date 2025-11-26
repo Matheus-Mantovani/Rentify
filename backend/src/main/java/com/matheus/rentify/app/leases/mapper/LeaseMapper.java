@@ -29,6 +29,9 @@ public abstract class LeaseMapper {
 
     @Mappings({
             @Mapping(target = "id", ignore = true),
+            @Mapping(target = "rentValueInWords", ignore = true),
+            @Mapping(target = "depositValueInWords", ignore = true),
+            @Mapping(target = "paintingFeeInWords", ignore = true),
             @Mapping(target = "property", source = "propertyId"),
             @Mapping(target = "tenant", source = "tenantId")
     })
@@ -38,6 +41,9 @@ public abstract class LeaseMapper {
 
     @Mappings({
             @Mapping(target = "id", ignore = true),
+            @Mapping(target = "rentValueInWords", ignore = true),
+            @Mapping(target = "depositValueInWords", ignore = true),
+            @Mapping(target = "paintingFeeInWords", ignore = true),
             @Mapping(target = "property", source = "propertyId"),
             @Mapping(target = "tenant", source = "tenantId")
     })

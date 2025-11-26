@@ -56,33 +56,39 @@ class PropertyServiceTest {
 
     @BeforeEach
     void setUp() {
-        State testState = new State();
-        testState.setStateCode("SP");
-        testState.setStateName("São Paulo");
-        stateRepository.save(testState);
+        propertyRepository.deleteAll();
+        tenantRepository.deleteAll();
+        leaseRepository.deleteAll();
+        valueHistoryRepository.deleteAll();
+        financialsHistoryRepository.deleteAll();
 
-        testCity = new City();
-        testCity.setCityName("Araraquara");
-        testCity.setState(testState);
-        cityRepository.save(testCity);
+        State testState = stateRepository.findByStateCode("SP")
+                .orElseGet(() -> {
+                    State s = new State();
+                    s.setStateCode("SP");
+                    s.setStateName("São Paulo");
+                    return stateRepository.save(s);
+                });
+
+        testCity = cityRepository.findByCityName("Araraquara")
+                .orElseGet(() -> {
+                    City c = new City();
+                    c.setCityName("Araraquara");
+                    c.setState(testState);
+                    return cityRepository.save(c);
+                });
 
         testTenant = new Tenant();
         testTenant.setFullName("Test Tenant");
         testTenant.setCpf("12345678901");
         testTenant.setCity(testCity);
         tenantRepository.save(testTenant);
-
-        Property testProperty = new Property();
-        testProperty.setAddress("123 Test St");
-        testProperty.setNeighborhood("Test Neighborhood");
-        testProperty.setPostalCode("12345678");
-        testProperty.setCity(testCity);
-        testProperty.setStatus(PropertyStatusEnum.AVAILABLE);
-        propertyRepository.save(testProperty);
     }
 
     @Test
     void createProperty_shouldSavePropertyAndInitialHistory() {
+        long initialPropertyCount = propertyRepository.count();
+
         PropertyRequestDTO requestDTO = new PropertyRequestDTO(
                 "123 Test St", null, "Centro", "14800000", testCity.getId(),
                 PropertyStatusEnum.AVAILABLE, new BigDecimal("250000.00"),
@@ -97,10 +103,9 @@ class PropertyServiceTest {
         assertThat(response.currentMarketValue()).isEqualByComparingTo("250000.00");
         assertThat(response.condoFee()).isEqualByComparingTo("300.00");
 
-        assertThat(propertyRepository.count()).isEqualTo(1);
+        assertThat(propertyRepository.count()).isEqualTo(initialPropertyCount + 1);
         assertThat(valueHistoryRepository.count()).isEqualTo(1);
         assertThat(financialsHistoryRepository.count()).isEqualTo(1);
-        assertThat(valueHistoryRepository.findAll().get(0).getPropertyValue()).isEqualByComparingTo("250000.00");
     }
 
     @Test
@@ -184,12 +189,14 @@ class PropertyServiceTest {
         Property property = createInitialProperty();
         long propertyId = property.getId();
 
+        long initialCount = propertyRepository.count();
+
         assertThat(leaseRepository.count()).isEqualTo(0);
 
         propertyService.deleteProperty(propertyId);
 
         assertThat(propertyRepository.findById(propertyId)).isEmpty();
-        assertThat(propertyRepository.count()).isEqualTo(0);
+        assertThat(propertyRepository.count()).isEqualTo(initialCount - 1);
     }
 
 

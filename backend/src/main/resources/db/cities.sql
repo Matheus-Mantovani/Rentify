@@ -1,4 +1,3 @@
-SET FOREIGN_KEY_CHECKS = 0;
 INSERT INTO cities (city_name, state_fk) VALUES ('Alta Floresta D''Oeste', 22);
 INSERT INTO cities (city_name, state_fk) VALUES ('Ariquemes', 22);
 INSERT INTO cities (city_name, state_fk) VALUES ('Cabixi', 22);
@@ -5569,4 +5568,3 @@ INSERT INTO cities (city_name, state_fk) VALUES ('Vicentinópolis', 9);
 INSERT INTO cities (city_name, state_fk) VALUES ('Vila Boa', 9);
 INSERT INTO cities (city_name, state_fk) VALUES ('Vila Propício', 9);
 INSERT INTO cities (city_name, state_fk) VALUES ('Brasília', 7);
-SET FOREIGN_KEY_CHECKS = 1;

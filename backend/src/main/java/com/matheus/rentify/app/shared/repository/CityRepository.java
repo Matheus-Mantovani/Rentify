@@ -12,4 +12,5 @@ import java.util.Optional;
 public interface CityRepository extends JpaRepository<City, Long> {
     Optional<City> findByCityNameAndState(String cityName, State state);
     List<City> findByStateId(Long stateId);
+    Optional<City> findByCityName(String araraquara);
 }

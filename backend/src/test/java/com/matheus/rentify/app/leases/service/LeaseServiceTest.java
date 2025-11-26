@@ -62,6 +62,11 @@ class LeaseServiceTest {
 
     @BeforeEach
     void setUp() {
+        leaseRepository.deleteAll();
+        leaseHistoryRepository.deleteAll();
+        propertyRepository.deleteAll();
+        tenantRepository.deleteAll();
+
         testState = new State();
         testState.setStateCode("SP");
         testState.setStateName("São Paulo");
