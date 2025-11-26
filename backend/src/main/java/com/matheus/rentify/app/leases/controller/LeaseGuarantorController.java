@@ -4,6 +4,7 @@ import com.matheus.rentify.app.leases.dto.request.LeaseGuarantorRequestDTO;
 import com.matheus.rentify.app.leases.dto.response.LeaseGuarantorResponseDTO;
 import com.matheus.rentify.app.leases.service.LeaseGuarantorService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.ServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/lease-guarantors")
+@Tag(name = "Leases", description = "Endpoint for managing lease guarantors")
 public class LeaseGuarantorController {
 
     private final LeaseGuarantorService leaseGuarantorService;

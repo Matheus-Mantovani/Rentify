@@ -10,7 +10,7 @@ import jakarta.validation.constraints.Size;
  */
 public record RegisterRequestDTO(
 
-        @Schema(description = "Full name of the user.", example = "Matheus Alexandre", requiredMode = Schema.RequiredMode.REQUIRED)
+        @Schema(description = "Full name of the user.", example = "Matheus Mantovani", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotBlank(message = "Full name cannot be blank.")
         @Size(min = 3, max = 255, message = "Full name must be between 3 and 255 characters.")
         String fullName,
