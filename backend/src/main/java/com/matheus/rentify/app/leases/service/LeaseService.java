@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 
 @Service
 public class LeaseService {
@@ -55,25 +56,14 @@ public class LeaseService {
         return leaseMapper.toResponseDTO(savedLease);
     }
 
-    @Transactional
-    public void terminateAndArchiveLease(Long leaseId, LeaseTerminationRequestDTO requestDTO) {
-        Lease lease = findLeaseByIdOrThrow(leaseId);
-
-        LeaseHistory historyRecord = leaseMapper.toLeaseHistory(requestDTO, lease);
-        historyRecord.setArchivedAt(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")));
-
-        Property property = findPropertyByIdOrThrow(lease.getProperty().getId());
-
-        if(requestDTO.moveOutCondition() == MoveOutConditionEnum.NEEDS_REPAIRS) {
-            property.setStatus(PropertyStatusEnum.UNDER_MAINTENANCE);
-        } else {
-            property.setStatus(PropertyStatusEnum.AVAILABLE);
-        }
-
-        propertyRepository.save(property);
-        leaseHistoryRepository.save(historyRecord);
-        leaseRepository.delete(lease);
+    @Transactional(readOnly = true)
+    public List<LeaseResponseDTO> getAllLeases() {
+        List<Lease> leases = leaseRepository.findAll();
+        return leases.stream()
+                .map(leaseMapper::toResponseDTO)
+                .toList();
     }
+
 
     @Transactional(readOnly = true)
     public LeaseResponseDTO getLeaseById(Long id) {
@@ -92,6 +82,26 @@ public class LeaseService {
         Lease updatedLease = leaseRepository.save(existingLease);
 
         return leaseMapper.toResponseDTO(updatedLease);
+    }
+
+    @Transactional
+    public void terminateAndArchiveLease(Long leaseId, LeaseTerminationRequestDTO requestDTO) {
+        Lease lease = findLeaseByIdOrThrow(leaseId);
+
+        LeaseHistory historyRecord = leaseMapper.toLeaseHistory(requestDTO, lease);
+        historyRecord.setArchivedAt(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")));
+
+        Property property = findPropertyByIdOrThrow(lease.getProperty().getId());
+
+        if(requestDTO.moveOutCondition() == MoveOutConditionEnum.NEEDS_REPAIRS) {
+            property.setStatus(PropertyStatusEnum.UNDER_MAINTENANCE);
+        } else {
+            property.setStatus(PropertyStatusEnum.AVAILABLE);
+        }
+
+        propertyRepository.save(property);
+        leaseHistoryRepository.save(historyRecord);
+        leaseRepository.delete(lease);
     }
 
     private Lease findLeaseByIdOrThrow(Long id) {

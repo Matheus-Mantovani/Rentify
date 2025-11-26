@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/leases")
@@ -38,6 +39,13 @@ public class LeaseController {
                 .toUri();
 
         return ResponseEntity.created(location).body(createdDto);
+    }
+
+    @GetMapping
+    @Operation(summary = "Get all active leases")
+    public ResponseEntity<List<LeaseResponseDTO>> getAllLeases() {
+        List<LeaseResponseDTO> leases = leaseService.getAllLeases();
+        return ResponseEntity.ok(leases);
     }
 
     @GetMapping("/{id}")
