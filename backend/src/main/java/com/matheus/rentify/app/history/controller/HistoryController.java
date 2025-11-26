@@ -35,7 +35,7 @@ public class HistoryController {
     }
 
     @GetMapping("/properties/{id}/valuations")
-    @Operation(summary = "Get the market value of a property by ID")
+    @Operation(summary = "Get the market value history of a property by ID")
     public ResponseEntity<List<PropertyValueHistoryResponseDTO>> getPropertyValuationHistory(@PathVariable Long id) {
         List<PropertyValueHistoryResponseDTO> propertyValuation = historyService.getPropertyValueHistory(id);
         return ResponseEntity.ok(propertyValuation);
