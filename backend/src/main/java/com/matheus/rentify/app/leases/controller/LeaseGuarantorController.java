@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/lease-guarantors")
-@Tag(name = "Leases", description = "Endpoint for managing lease guarantors")
+@Tag(name = "Lease Guarantors", description = "Endpoint for managing lease guarantors")
 public class LeaseGuarantorController {
 
     private final LeaseGuarantorService leaseGuarantorService;
