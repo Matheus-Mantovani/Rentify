@@ -1,17 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Building2, TrendingUp, Shield, Clock, CheckCircle, Menu, X, ArrowRight } from 'lucide-react';
+import { Building2, TrendingUp, Shield, Clock, CheckCircle, ArrowRight } from 'lucide-react';
+import Navbar from '../components/Navbar';
 
-export default function RentifyLanding() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+export default function Landing() {
   const [formData, setFormData] = useState({ name: '', email: '', phone: '' });
   const [formSubmitted, setFormSubmitted] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -38,11 +31,6 @@ export default function RentifyLanding() {
     }, 3000);
   };
 
-  const scrollToSection = (id) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-    setIsMenuOpen(false);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <style>{`
@@ -53,57 +41,8 @@ export default function RentifyLanding() {
         .gradient-text { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
       `}</style>
 
-      {/* Navigation */}
-      <nav className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-lg py-3' : 'bg-transparent py-5'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-2">
-              <Building2 className="w-8 h-8 text-blue-600" />
-              <span className="text-2xl font-bold gradient-text">Rentify</span>
-            </div>
-            
-            <div className="hidden md:flex space-x-8">
-              {['Início', 'Recursos', 'Depoimentos', 'Contato'].map((item, idx) => (
-                <button
-                  key={item}
-                  onClick={() => scrollToSection(['hero', 'features', 'testimonials', 'contact'][idx])}
-                  className="text-slate-700 hover:text-blue-600 font-medium transition-colors"
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-
-            <button className="hidden md:block bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition-all hover:scale-105">
-              Começar Agora
-            </button>
-
-            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden text-slate-700">
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden bg-white border-t mt-3">
-            <div className="px-4 py-4 space-y-3">
-              {['Início', 'Recursos', 'Depoimentos', 'Contato'].map((item, idx) => (
-                <button
-                  key={item}
-                  onClick={() => scrollToSection(['hero', 'features', 'testimonials', 'contact'][idx])}
-                  className="block w-full text-left text-slate-700 hover:text-blue-600 font-medium py-2"
-                >
-                  {item}
-                </button>
-              ))}
-              <button className="w-full bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700">
-                Começar Agora
-              </button>
-            </div>
-          </div>
-        )}
-      </nav>
+      {/* Navbar */}
+      <Navbar />
 
       {/* Hero Section */}
       <section id="hero" className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
