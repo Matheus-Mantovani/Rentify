@@ -17,4 +17,14 @@ public interface LeaseRepository extends JpaRepository<Lease, Long> {
     List<Lease> findByEndDateBetween(LocalDate startDate, LocalDate endDate);
     List<Lease> findAllByStatus(LeaseStatusEnum status);
     List<Lease> findByEndDateBetweenAndStatus(LocalDate start, LocalDate end, LeaseStatusEnum status);
+
+    @Query("SELECT l FROM Lease l WHERE l.endDate BETWEEN :startDate AND :endDate AND l.status = :status")
+    List<Lease> findExpiringLeases(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("status") LeaseStatusEnum status
+    );
+
+    @Query("SELECT COUNT(l) FROM Lease l WHERE l.startDate <= :date AND (l.moveOutDate IS NULL OR l.moveOutDate > :date)")
+    long countActiveLeasesOnDate(@Param("date") LocalDate date);
 }

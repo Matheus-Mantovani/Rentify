@@ -2,12 +2,15 @@ package com.matheus.rentify.app.reports.service;
 
 import com.matheus.rentify.app.leases.model.Lease;
 import com.matheus.rentify.app.leases.model.LeaseStatusEnum;
+import com.matheus.rentify.app.leases.model.Payment;
 import com.matheus.rentify.app.leases.repository.LeaseRepository;
 import com.matheus.rentify.app.leases.repository.PaymentRepository;
+import com.matheus.rentify.app.properties.model.MaintenanceJob;
 import com.matheus.rentify.app.properties.model.MaintenanceStatusEnum;
 import com.matheus.rentify.app.properties.repository.MaintenanceJobRepository;
 import com.matheus.rentify.app.properties.repository.PropertyRepository;
 import com.matheus.rentify.app.reports.dto.response.*;
+import com.matheus.rentify.app.reports.model.ActivityTypeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,33 +46,109 @@ public class ReportService {
         long rentedProps = propertyRepository.countRentedProperties();
         long maintenanceProps = propertyRepository.countMaintenanceProperties();
 
-        double occupancyRate = 0.0;
+        double currentOccupancyRate = 0.0;
         if (totalProps > 0) {
-            occupancyRate = (double) rentedProps / totalProps * 100;
-            BigDecimal bd = new BigDecimal(occupancyRate).setScale(2, RoundingMode.HALF_UP);
-            occupancyRate = bd.doubleValue();
+            currentOccupancyRate = (double) rentedProps / totalProps * 100;
+            currentOccupancyRate = Math.round(currentOccupancyRate * 100.0) / 100.0;
         }
 
         LocalDate now = LocalDate.now();
-        BigDecimal currentMonthRevenue = paymentRepository.sumRevenueByMonthAndYear(now.getMonthValue(), now.getYear());
-        if (currentMonthRevenue == null) {
-            currentMonthRevenue = BigDecimal.ZERO;
+        BigDecimal currentRevenue = paymentRepository.sumRevenueByMonthAndYear(now.getMonthValue(), now.getYear());
+        if (currentRevenue == null) currentRevenue = BigDecimal.ZERO;
+
+        BigDecimal outstandingMaintenance = maintenanceJobRepository.sumOutstandingCosts(
+                Arrays.asList(MaintenanceStatusEnum.PENDING, MaintenanceStatusEnum.IN_PROGRESS)
+        );
+        if (outstandingMaintenance == null) outstandingMaintenance = BigDecimal.ZERO;
+
+        LocalDate lastMonthDate = now.minusMonths(1);
+
+        BigDecimal lastMonthRevenue = paymentRepository.sumRevenueByMonthAndYear(lastMonthDate.getMonthValue(), lastMonthDate.getYear());
+        if (lastMonthRevenue == null) lastMonthRevenue = BigDecimal.ZERO;
+
+        Double revenueChange = calculatePercentageChange(currentRevenue, lastMonthRevenue);
+
+        LocalDate endOfLastMonth = now.withDayOfMonth(1).minusDays(1);
+        long rentedLastMonth = leaseRepository.countActiveLeasesOnDate(endOfLastMonth);
+
+        double lastMonthOccupancyRate = 0.0;
+        if (totalProps > 0) {
+            lastMonthOccupancyRate = (double) rentedLastMonth / totalProps * 100;
         }
 
-        BigDecimal outstandingMaintenance = maintenanceJobRepository.sumOutstandingCosts(Arrays.asList(MaintenanceStatusEnum.PENDING, MaintenanceStatusEnum.IN_PROGRESS));
-        if (outstandingMaintenance == null) {
-            outstandingMaintenance = BigDecimal.ZERO;
-        }
+        Double occupancyChange = calculatePercentageChange(
+                BigDecimal.valueOf(currentOccupancyRate),
+                BigDecimal.valueOf(lastMonthOccupancyRate)
+        );
+
 
         return new DashboardSummaryResponseDTO(
                 totalProps,
                 availableProps,
                 rentedProps,
-                occupancyRate,
+                currentOccupancyRate,
                 maintenanceProps,
-                currentMonthRevenue,
-                outstandingMaintenance
+                currentRevenue,
+                outstandingMaintenance,
+                revenueChange,      // Novo
+                occupancyChange     // Novo
         );
+    }
+
+    @Transactional(readOnly = true)
+    public List<DashboardActivityResponseDTO> getRecentActivities() {
+        List<DashboardActivityResponseDTO> activities = new ArrayList<>();
+
+        List<Payment> recentPayments = paymentRepository.findTop5ByOrderByPaymentDateDesc();
+        for (Payment p : recentPayments) {
+            activities.add(new DashboardActivityResponseDTO(
+                    ActivityTypeEnum.PAYMENT,
+                    "Pagamento recebido de " + p.getLease().getTenant().getFullName(),
+                    p.getLease().getProperty().getAddress(),
+                    p.getAmountPaid(),
+                    p.getPaymentDate(),
+                    p.getId(),
+                    null
+            ));
+        }
+
+        List<MaintenanceJob> recentJobs = maintenanceJobRepository.findTop5ByOrderByRequestDateDesc();
+        for (MaintenanceJob job : recentJobs) {
+            activities.add(new DashboardActivityResponseDTO(
+                    ActivityTypeEnum.MAINTENANCE,
+                    "Manutenção: " + job.getMaintenanceStatus(),
+                    job.getServiceDescription(),
+                    job.getTotalCost(),
+                    job.getRequestDate(),
+                    job.getId(),
+                    null
+            ));
+        }
+
+        LocalDate today = LocalDate.now();
+        List<Lease> expiringLeases = leaseRepository.findExpiringLeases(
+                today,
+                today.plusDays(30),
+                LeaseStatusEnum.ACTIVE
+        );
+
+        for (Lease lease : expiringLeases) {
+            long daysLeft = ChronoUnit.DAYS.between(today, lease.getEndDate());
+            activities.add(new DashboardActivityResponseDTO(
+                    ActivityTypeEnum.EXPIRING_LEASE,
+                    "Contrato vencendo",
+                    lease.getProperty().getAddress(),
+                    null,
+                    lease.getEndDate(),
+                    lease.getId(),
+                    daysLeft
+            ));
+        }
+
+        return activities.stream()
+                .sorted(Comparator.comparing(DashboardActivityResponseDTO::date).reversed())
+                .limit(5)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -185,5 +264,16 @@ public class ReportService {
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+    }
+
+    private Double calculatePercentageChange(BigDecimal current, BigDecimal previous) {
+        if (previous.compareTo(BigDecimal.ZERO) == 0) {
+            return current.compareTo(BigDecimal.ZERO) > 0 ? 100.0 : 0.0;
+        }
+
+        BigDecimal difference = current.subtract(previous);
+        BigDecimal change = difference.divide(previous, 4, RoundingMode.HALF_UP).multiply(new BigDecimal(100));
+
+        return change.setScale(1, RoundingMode.HALF_UP).doubleValue();
     }
 }

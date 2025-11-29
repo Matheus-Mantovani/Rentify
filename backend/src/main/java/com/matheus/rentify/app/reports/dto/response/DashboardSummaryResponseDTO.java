@@ -28,6 +28,12 @@ public record DashboardSummaryResponseDTO(
         BigDecimal currentMonthRevenue,
 
         @Schema(description = "Total outstanding costs for maintenance jobs in the current month.", example = "1200.50")
-        BigDecimal outstandingMaintenanceCosts
+        BigDecimal outstandingMaintenanceCosts,
+
+        @Schema(description = "Percentage change in revenue compared to last month", example = "12.5")
+        Double revenueChangePercentage,
+
+        @Schema(description = "Percentage change in occupancy rate compared to last month", example = "2.1")
+        Double occupancyRateChangePercentage
 ) {
 }

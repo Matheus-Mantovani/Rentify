@@ -13,6 +13,7 @@ import java.util.List;
 @Repository
 public interface MaintenanceJobRepository extends JpaRepository<MaintenanceJob, Long> {
     List<MaintenanceJob> findByPropertyIdOrderByRequestDateDesc(Long propertyId);
+    List<MaintenanceJob> findTop5ByOrderByRequestDateDesc();
 
     @Query("SELECT SUM(m.totalCost) FROM MaintenanceJob m WHERE m.maintenanceStatus IN :statuses")
     BigDecimal sumOutstandingCosts(@Param("statuses") List<MaintenanceStatusEnum> statuses);

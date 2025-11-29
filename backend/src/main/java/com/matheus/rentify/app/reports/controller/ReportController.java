@@ -53,4 +53,10 @@ public class ReportController {
     ) {
         return ResponseEntity.ok(reportService.getLatePayments(referenceMonth, referenceYear));
     }
+
+    @GetMapping("/recent-activities")
+    @Operation(summary = "Get a unified list of recent activities (payments, jobs, alerts)")
+    public ResponseEntity<List<DashboardActivityResponseDTO>> getRecentActivities() {
+        return ResponseEntity.ok(reportService.getRecentActivities());
+    }
 }
