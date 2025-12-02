@@ -15,6 +15,8 @@ import Register from './pages/auth/Register';
 import Dashboard from './pages/Dashboard';
 import PropertiesList from './pages/properties/PropertiesList';
 import PropertyDetails from './pages/properties/PropertyDetails';
+import TenantsList from './pages/tenants/TenantsList';
+import TenantDetails from './pages/tenants/TenantDetails';
 
 function App() {
   return (
@@ -38,6 +40,8 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="properties" element={<PropertiesList />} />
           <Route path="properties/:id" element={<PropertyDetails />} />
+          <Route path="tenants" element={<TenantsList />} />
+          <Route path="tenants/:id" element={<TenantDetails />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

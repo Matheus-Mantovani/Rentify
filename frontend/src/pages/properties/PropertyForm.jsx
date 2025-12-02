@@ -232,7 +232,7 @@ export default function PropertyForm({ onClose, onSuccess, propertyToEdit }) {
                       }}
                       onFocus={() => setShowSuggestions(true)}
                       placeholder={formData.stateId ? "Buscar..." : "Buscar..."}
-                      className={`w-full pl-8 pr-4 py-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 transition-all ${!formData.cityId ? 'border-red-300 bg-red-50' : 'border-slate-300'}`}
+                      className={`w-full pl-8 pr-4 py-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 transition-all ${error && !formData.cityId ? 'border-red-300 bg-red-50' : 'border-slate-300'}`}
                       required={!formData.cityId}
                     />
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
