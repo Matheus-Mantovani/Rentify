@@ -11,17 +11,13 @@ import com.matheus.rentify.app.leases.repository.LeaseRepository;
 import com.matheus.rentify.app.properties.model.Property;
 import com.matheus.rentify.app.properties.model.PropertyStatusEnum;
 import com.matheus.rentify.app.properties.repository.PropertyRepository;
-import com.matheus.rentify.app.reports.dto.response.ExpiringLeaseResponseDTO;
 import com.matheus.rentify.app.shared.util.MonetaryConverter;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class LeaseService {
@@ -56,13 +52,23 @@ public class LeaseService {
     }
 
     @Transactional(readOnly = true)
-    public List<LeaseResponseDTO> getAll(LeaseStatusEnum status) {
+    public List<LeaseResponseDTO> getAll(LeaseStatusEnum status, Long tenantId) {
         List<Lease> leases;
-        if(status != null) {
+
+        if (tenantId != null) {
+            leases = leaseRepository.findByTenantId(tenantId);
+
+            if (status != null) {
+                leases = leases.stream()
+                        .filter(l -> l.getStatus() == status)
+                        .toList();
+            }
+        } else if (status != null) {
             leases = leaseRepository.findAllByStatus(status);
         } else {
             leases = leaseRepository.findAll();
         }
+
         return leases.stream()
                 .map(leaseMapper::toResponseDTO)
                 .toList();

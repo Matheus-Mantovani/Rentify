@@ -41,16 +41,18 @@ public class PaymentService {
     }
 
     @Transactional(readOnly = true)
-    public List<PaymentResponseDTO> getPayments(Long leaseId) {
+    public List<PaymentResponseDTO> getAll(Long leaseId, Long tenantId) {
         List<Payment> payments;
 
-        if(leaseId == null) {
-            payments = paymentRepository.findAll(Sort.by(Sort.Direction.DESC, "paymentDate"));
-        } else {
+        if (leaseId != null) {
             if(!leaseRepository.existsById(leaseId)) {
                 throw new EntityNotFoundException("Lease not found with ID: " + leaseId);
             }
             payments = paymentRepository.findByLeaseIdOrderByPaymentDateDesc(leaseId);
+        } else if (tenantId != null) {
+            payments = paymentRepository.findByLeaseTenantIdOrderByPaymentDateDesc(tenantId);
+        } else {
+            payments = paymentRepository.findAll(Sort.by(Sort.Direction.DESC, "paymentDate"));
         }
 
         return payments.stream()
@@ -61,25 +63,20 @@ public class PaymentService {
     @Transactional(readOnly = true)
     public PaymentResponseDTO getPaymentById(Long id) {
         Payment payment = findPaymentByIdOrThrow(id);
-
         return paymentMapper.toResponseDTO(payment);
     }
 
     @Transactional
     public PaymentResponseDTO updatePayment(Long id, PaymentRequestDTO requestDTO) {
         Payment payment = findPaymentByIdOrThrow(id);
-
         paymentMapper.updateEntityFromDto(requestDTO, payment);
-
         Payment updatedPayment = paymentRepository.save(payment);
-
         return paymentMapper.toResponseDTO(updatedPayment);
     }
 
     @Transactional
     public void deletePayment(Long id) {
         Payment payment = findPaymentByIdOrThrow(id);
-
         paymentRepository.delete(payment);
     }
 

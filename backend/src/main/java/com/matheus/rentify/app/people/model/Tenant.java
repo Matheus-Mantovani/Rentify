@@ -3,6 +3,10 @@ package com.matheus.rentify.app.people.model;
 import com.matheus.rentify.app.shared.model.City;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "tenants")
@@ -10,6 +14,8 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@SQLDelete(sql = "UPDATE tenants SET deleted_at = CURRENT_TIMESTAMP WHERE tenant_id = ?")
+@SQLRestriction("deleted_at IS NULL")
 public class Tenant {
 
     @Id
@@ -48,4 +54,7 @@ public class Tenant {
     @ManyToOne
     @JoinColumn(name = "city_fk")
     private City city;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 }

@@ -13,6 +13,7 @@ import java.util.List;
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
     List<Payment> findByLeaseIdOrderByPaymentDateDesc(Long id);
     List<Payment> findTop5ByOrderByPaymentDateDesc();
+    List<Payment> findByLeaseTenantIdOrderByPaymentDateDesc(Long tenantId);
 
     @Query("SELECT SUM(p.amountPaid) FROM Payment p WHERE p.referenceMonth = :month AND p.referenceYear = :year")
     BigDecimal sumRevenueByMonthAndYear(@Param("month") int month, @Param("year") int year);

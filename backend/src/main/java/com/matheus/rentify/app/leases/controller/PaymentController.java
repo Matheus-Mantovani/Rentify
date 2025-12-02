@@ -41,10 +41,12 @@ public class PaymentController {
     }
 
     @GetMapping
-    @Operation(summary = "Get all payments, optionally filtered by leaseId")
-    public ResponseEntity<List<PaymentResponseDTO>> getAllPayments(@RequestParam(required = false) Long leaseId) {
-        List<PaymentResponseDTO> payments = paymentService.getPayments(leaseId);
-
+    @Operation(summary = "Get all payments, optionally filtered by leaseId or tenantId")
+    public ResponseEntity<List<PaymentResponseDTO>> getAllPayments(
+            @RequestParam(required = false) Long leaseId,
+            @RequestParam(required = false) Long tenantId
+    ) {
+        List<PaymentResponseDTO> payments = paymentService.getAll(leaseId, tenantId);
         return ResponseEntity.ok(payments);
     }
 
@@ -62,7 +64,6 @@ public class PaymentController {
             @Valid @RequestBody PaymentRequestDTO requestDTO) {
 
         PaymentResponseDTO updatedDto = paymentService.updatePayment(id, requestDTO);
-
         return ResponseEntity.ok(updatedDto);
     }
 

@@ -1,5 +1,7 @@
 package com.matheus.rentify.app.people.service;
 
+import com.matheus.rentify.app.leases.model.Lease;
+import com.matheus.rentify.app.leases.model.LeaseStatusEnum;
 import com.matheus.rentify.app.leases.repository.LeaseRepository;
 import com.matheus.rentify.app.people.dto.request.TenantRequestDTO;
 import com.matheus.rentify.app.people.dto.response.TenantDetailsResponseDTO;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TenantService {
@@ -30,9 +33,31 @@ public class TenantService {
 
     @Transactional
     public TenantDetailsResponseDTO createTenant(TenantRequestDTO requestDTO) {
-        Tenant tenant = tenantMapper.toEntity(requestDTO);
-        Tenant savedTenant = tenantRepository.save(tenant);
+        String rawCpf = requestDTO.cpf().replaceAll("\\D", "");
 
+        Optional<Tenant> existingTenantOpt = tenantRepository.findByCpfIncludingDeleted(rawCpf);
+
+        if (existingTenantOpt.isPresent()) {
+            Tenant existingTenant = existingTenantOpt.get();
+
+            if (existingTenant.getDeletedAt() == null) {
+                throw new IllegalStateException("Tenant with CPF " + rawCpf + " already exists.");
+            }
+
+            existingTenant.setDeletedAt(null);
+
+            tenantMapper.updateEntityFromDto(requestDTO, existingTenant);
+
+            existingTenant.setCpf(rawCpf);
+
+            Tenant reactivatedTenant = tenantRepository.save(existingTenant);
+            return tenantMapper.toDetailsResponseDTO(reactivatedTenant);
+        }
+
+        Tenant tenant = tenantMapper.toEntity(requestDTO);
+        tenant.setCpf(rawCpf);
+
+        Tenant savedTenant = tenantRepository.save(tenant);
         return tenantMapper.toDetailsResponseDTO(savedTenant);
     }
 
@@ -78,11 +103,10 @@ public class TenantService {
     @Transactional
     public void deleteTenant(Long id) {
         Tenant tenant = findTenantByIdOrThrow(id);
+        List<Lease> activeLeases = findByTenantIdAndStatusOrThrow(id, LeaseStatusEnum.ACTIVE);
 
-        boolean hasActiveLeases = leaseRepository.existsByTenantId(id);
-
-        if(hasActiveLeases) {
-            throw new IllegalStateException("Cannot delete tenant with ID " + id + " because he/she has associated active leases");
+        if (!activeLeases.isEmpty()) {
+            throw new IllegalStateException("Cannot delete tenant with ID " + id + " because they have active leases. Terminate the leases first.");
         }
 
         tenantRepository.delete(tenant);
@@ -91,5 +115,9 @@ public class TenantService {
     private Tenant findTenantByIdOrThrow(Long id) {
         return tenantRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Tenant not found with id: " + id));
+    }
+
+    private List<Lease> findByTenantIdAndStatusOrThrow(Long id, LeaseStatusEnum status) {
+        return leaseRepository.findByTenantIdAndStatus(id, status);
     }
 }

@@ -14,9 +14,10 @@ import java.util.List;
 public interface LeaseRepository extends JpaRepository<Lease, Long> {
     boolean existsByPropertyId(Long id);
     boolean existsByTenantId(Long id);
-    List<Lease> findByEndDateBetween(LocalDate startDate, LocalDate endDate);
     List<Lease> findAllByStatus(LeaseStatusEnum status);
     List<Lease> findByEndDateBetweenAndStatus(LocalDate start, LocalDate end, LeaseStatusEnum status);
+    List<Lease> findByTenantId(Long tenantId);
+    List<Lease> findByTenantIdAndStatus(Long tenantId, LeaseStatusEnum status);
 
     @Query("SELECT l FROM Lease l WHERE l.endDate BETWEEN :startDate AND :endDate AND l.status = :status")
     List<Lease> findExpiringLeases(
