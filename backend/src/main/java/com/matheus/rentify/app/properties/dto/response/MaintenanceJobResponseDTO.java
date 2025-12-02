@@ -1,6 +1,5 @@
 package com.matheus.rentify.app.properties.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.matheus.rentify.app.properties.model.MaintenanceStatusEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -25,12 +24,10 @@ public record MaintenanceJobResponseDTO(
         @Schema(description = "Detailed description of the service performed.", example = "Repair leaking kitchen faucet")
         String serviceDescription,
 
-        @Schema(description = "Date when the maintenance was requested.", example = "08-10-2025")
-        @JsonFormat(pattern = "dd-MM-yyyy")
+        @Schema(description = "Date when the maintenance was requested.", example = "2025-10-08")
         LocalDate requestDate,
 
-        @Schema(description = "Date when the maintenance was completed.", example = "10-10-2025")
-        @JsonFormat(pattern = "dd-MM-yyyy")
+        @Schema(description = "Date when the maintenance was completed.", example = "2025-10-08")
         LocalDate completionDate,
 
         @Schema(description = "Total cost of the service.", example = "150.00")

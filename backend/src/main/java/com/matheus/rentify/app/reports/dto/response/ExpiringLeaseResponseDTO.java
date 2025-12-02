@@ -1,6 +1,5 @@
 package com.matheus.rentify.app.reports.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 
@@ -20,7 +19,6 @@ public record ExpiringLeaseResponseDTO(
         String tenantName,
 
         @Schema(description = "The date the lease agreement ends.", example = "01-12-2025")
-        @JsonFormat(pattern = "dd-MM-yyyy")
         LocalDate endDate,
 
         @Schema(description = "Number of days remaining until the lease expires.", example = "5")

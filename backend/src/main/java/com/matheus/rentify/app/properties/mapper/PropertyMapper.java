@@ -33,7 +33,9 @@ public abstract class PropertyMapper {
 
     @Mappings({
             @Mapping(target = "cityName", source = "entity.city.cityName"),
-            @Mapping(target = "stateCode", source = "entity.city.state.stateCode")
+            @Mapping(target = "stateCode", source = "entity.city.state.stateCode"),
+            @Mapping(target = "cityId", source = "entity.city.id"),
+            @Mapping(target = "stateId", source = "entity.city.state.id")
     })
     public abstract PropertyDetailsResponseDTO toDetailsResponseDTO(Property entity);
 

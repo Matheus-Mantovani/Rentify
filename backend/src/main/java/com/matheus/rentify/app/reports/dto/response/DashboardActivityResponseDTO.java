@@ -1,6 +1,5 @@
 package com.matheus.rentify.app.reports.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.matheus.rentify.app.reports.model.ActivityTypeEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -25,7 +24,6 @@ public record DashboardActivityResponseDTO(
         BigDecimal value,
 
         @Schema(description = "Date of the event", example = "28-11-2024")
-        @JsonFormat(pattern = "dd-MM-yyyy")
         LocalDate date,
 
         @Schema(description = "ID of the original entity (PaymentID, JobID, LeaseID)", example = "10")

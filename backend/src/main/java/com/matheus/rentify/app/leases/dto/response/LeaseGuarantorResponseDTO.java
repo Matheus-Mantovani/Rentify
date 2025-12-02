@@ -1,6 +1,5 @@
 package com.matheus.rentify.app.leases.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.matheus.rentify.app.leases.model.GuaranteeTypeEnum;
 import com.matheus.rentify.app.leases.model.LeaseGuarantorStatusEnum;
 import com.matheus.rentify.app.people.dto.response.GuarantorResponseDTO;
@@ -26,8 +25,7 @@ public record LeaseGuarantorResponseDTO(
         @Schema(description = "Type of guarantee provided.", example = "Guarantor with property")
         GuaranteeTypeEnum guaranteeType,
 
-        @Schema(description = "The date the guarantor officially signed the contract.", example = "08-10-2025")
-        @JsonFormat(pattern = "dd-MM-yyyy")
+        @Schema(description = "The date the guarantor officially signed the contract.", example = "2025-10-08")
         LocalDate signatureDate,
 
         @Schema(description = "Lifecycle status of this guarantee.", example = "ACTIVE")

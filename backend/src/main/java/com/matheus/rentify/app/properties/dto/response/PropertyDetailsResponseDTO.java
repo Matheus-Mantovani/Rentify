@@ -1,6 +1,5 @@
 package com.matheus.rentify.app.properties.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.matheus.rentify.app.properties.model.PropertyStatusEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -17,6 +16,12 @@ public record PropertyDetailsResponseDTO(
         Long id,
 
         // --- Location ---
+        @Schema(description = "ID of the city where the property is located.", example = "1")
+        Long cityId,
+
+        @Schema(description = "ID of the state where the property is located.", example = "2")
+        Long stateId,
+
         @Schema(description = "Full street address of the property.", example = "123 Main St, Apt 4B")
         String address,
 

@@ -1,6 +1,5 @@
 package com.matheus.rentify.app.history.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
@@ -23,8 +22,7 @@ public record PropertyValueHistoryResponseDTO(
         @Schema(description = "The market value of the property on the record date.", example = "450000.00")
         BigDecimal propertyValue,
 
-        @Schema(description = "The date of this valuation.", example = "15-07-2024")
-        @JsonFormat(pattern = "dd-MM-yyyy")
+        @Schema(description = "The date of this valuation.", example = "2025-10-08")
         LocalDate recordDate
 ) {
 }

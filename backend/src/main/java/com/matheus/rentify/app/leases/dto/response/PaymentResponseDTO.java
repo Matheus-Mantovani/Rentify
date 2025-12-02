@@ -22,8 +22,7 @@ public record PaymentResponseDTO(
         @Schema(description = "The actual amount paid.", example = "1550.00")
         BigDecimal amountPaid,
 
-        @Schema(description = "The date the payment was received.", example = "12-10-2025")
-        @JsonFormat(pattern = "dd-MM-yyyy")
+        @Schema(description = "The date the payment was received.", example = "2025-10-08")
         LocalDate paymentDate,
 
         @Schema(description = "The month the rent payment is for (1-12).", example = "10")

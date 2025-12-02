@@ -5,6 +5,8 @@ import com.matheus.rentify.app.shared.dto.response.StateResponseDTO;
 import com.matheus.rentify.app.shared.repository.CityRepository;
 import com.matheus.rentify.app.shared.repository.StateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +35,15 @@ public class LocationService {
     @Transactional(readOnly = true)
     public List<CityResponseDTO> getAllCitiesByState(Long stateId) {
         return cityRepository.findByStateId(stateId)
+                .stream()
+                .map(city -> new CityResponseDTO(city.getId(), city.getCityName(), city.getState().getStateCode()))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<CityResponseDTO> searchCities(String query, Long stateId) {
+        Pageable limit = PageRequest.of(0, 5);
+        return cityRepository.searchCities(query, stateId, limit)
                 .stream()
                 .map(city -> new CityResponseDTO(city.getId(), city.getCityName(), city.getState().getStateCode()))
                 .toList();

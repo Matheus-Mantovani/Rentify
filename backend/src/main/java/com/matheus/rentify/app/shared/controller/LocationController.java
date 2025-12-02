@@ -2,7 +2,6 @@ package com.matheus.rentify.app.shared.controller;
 
 import com.matheus.rentify.app.shared.dto.response.CityResponseDTO;
 import com.matheus.rentify.app.shared.dto.response.StateResponseDTO;
-import com.matheus.rentify.app.shared.model.State;
 import com.matheus.rentify.app.shared.service.LocationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -37,5 +36,14 @@ public class LocationController {
     @Operation(summary = "Get cities for a specific state")
     public ResponseEntity<List<CityResponseDTO>> getAllCitiesByState(@RequestParam Long stateId) {
         return ResponseEntity.ok(locationService.getAllCitiesByState(stateId));
+    }
+
+    @GetMapping("/cities/search")
+    @Operation(summary = "Search cities by name (autocomplete)")
+    public ResponseEntity<List<CityResponseDTO>> searchCities(
+            @RequestParam String query,
+            @RequestParam(required = false) Long stateId
+    ) {
+        return ResponseEntity.ok(locationService.searchCities(query, stateId));
     }
 }
