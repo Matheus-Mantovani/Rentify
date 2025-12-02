@@ -64,6 +64,13 @@ export default function Dashboard() {
     }).format(value || 0);
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const [year, month, day] = dateString.split('-');
+    const date = new Date(year, month - 1, day);
+    return date.toLocaleDateString('pt-BR');
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full min-h-[400px]">
@@ -271,7 +278,7 @@ export default function Dashboard() {
                     <p className="font-bold text-yellow-600">{activity.daysRemaining} dias</p>
                   )}
 
-                  <p className="text-xs text-slate-500 mt-0.5">{activity.date}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{formatDate(activity.date)}</p>
                 </div>
               </div>
             ))

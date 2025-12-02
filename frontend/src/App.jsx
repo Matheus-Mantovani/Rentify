@@ -1,17 +1,26 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
+// --- LAYOUTS ---
+import DashboardLayout from './layouts/DashboardLayout';
+
+// --- COMPONENTS ---
+import Navbar from './components/Navbar';
+
+// --- PAGES: PUBLIC ---
 import Landing from './pages/Landing';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
-import Dashboard from './pages/Dashboard';
-import DashboardLayout from './layouts/DashboardLayout';
 
-import Navbar from './components/Navbar';
+// --- PAGES: PROTECTED (DASHBOARD) ---
+import Dashboard from './pages/Dashboard';
+import PropertiesList from './pages/properties/PropertiesList';
+import PropertyDetails from './pages/properties/PropertyDetails';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        
         <Route 
           path="/" 
           element={
@@ -21,12 +30,16 @@ function App() {
             </>
           } 
         />
-      
+
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<Dashboard />} />
+          <Route path="properties" element={<PropertiesList />} />
+          <Route path="properties/:id" element={<PropertyDetails />} />
         </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
