@@ -17,6 +17,7 @@ import PropertiesList from './pages/properties/PropertiesList';
 import PropertyDetails from './pages/properties/PropertyDetails';
 import TenantsList from './pages/tenants/TenantsList';
 import TenantDetails from './pages/tenants/TenantDetails';
+import PaymentsList from './pages/payments/PaymentsList';
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
           <Route path="properties/:id" element={<PropertyDetails />} />
           <Route path="tenants" element={<TenantsList />} />
           <Route path="tenants/:id" element={<TenantDetails />} />
+          <Route path="payments" element={<PaymentsList />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
