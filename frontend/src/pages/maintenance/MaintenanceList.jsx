@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { 
   Plus, Search, Filter, Wrench, Calendar, 
   Edit, Trash2, CheckCircle, XCircle, AlertCircle, Clock,
@@ -9,6 +10,7 @@ import { propertyService } from '../../services/propertyService';
 import MaintenanceModal from './MaintenanceModal';
 
 export default function MaintenanceList() {
+  const location = useLocation()
   const [jobs, setJobs] = useState([]);
   const [properties, setProperties] = useState([]); 
   const [loading, setLoading] = useState(true);
@@ -25,6 +27,15 @@ export default function MaintenanceList() {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (location.state?.openModal) {
+      setSelectedJob(null);
+      setShowModal(true);
+
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   const loadData = async () => {
     setLoading(true);

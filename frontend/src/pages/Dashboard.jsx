@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   DollarSign, TrendingUp, Home, Wrench, 
   ArrowUpRight, ArrowDownRight, 
-  Building2, Calendar, AlertCircle 
+  Building2, Calendar, AlertCircle, User 
 } from 'lucide-react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell 
@@ -10,6 +11,7 @@ import {
 import { reportService } from '../services/reportService';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [summary, setSummary] = useState(null);
   const [activities, setActivities] = useState([]);
   const [financialData, setFinancialData] = useState([]);
@@ -69,6 +71,37 @@ export default function Dashboard() {
     const [year, month, day] = dateString.split('-');
     const date = new Date(year, month - 1, day);
     return date.toLocaleDateString('pt-BR');
+  };
+
+  const quickActions = [
+    { 
+      label: 'Novo Imóvel', 
+      icon: Building2, 
+      color: 'blue', 
+      path: '/dashboard/properties' 
+    },
+    { 
+      label: 'Novo Inquilino',
+      icon: User,
+      color: 'green',
+      path: '/dashboard/tenants'
+    },
+    { 
+      label: 'Nova Manutenção', 
+      icon: Wrench, 
+      color: 'orange', 
+      path: '/dashboard/maintenance' 
+    },
+    { 
+      label: 'Novo Contrato', 
+      icon: Calendar, 
+      color: 'purple', 
+      path: '/dashboard/leases' 
+    }
+  ];
+
+  const handleQuickAction = (path) => {
+    navigate(path, { state: { openModal: true } });
   };
 
   if (loading) {
@@ -228,15 +261,20 @@ export default function Dashboard() {
         <div className="bg-white rounded-xl p-6 shadow-sm">
           <h2 className="text-lg font-bold text-slate-900 mb-4">Ações Rápidas</h2>
           <div className="space-y-3">
-            {[
-              { label: 'Novo Imóvel', icon: Building2, color: 'blue', path: '/properties/new' },
-              { label: 'Registrar Pagamento', icon: DollarSign, color: 'green', path: '/payments/new' },
-              { label: 'Nova Manutenção', icon: Wrench, color: 'orange', path: '/maintenance/new' },
-              { label: 'Novo Contrato', icon: Calendar, color: 'purple', path: '/leases/new' }
-            ].map((action, idx) => (
-              <button key={idx} className="w-full flex items-center gap-3 p-3 rounded-lg border border-slate-100 hover:bg-slate-50 transition-all group">
-                <div className={`bg-${action.color}-50 p-2 rounded-md group-hover:bg-${action.color}-100 transition-colors`}>
-                  <action.icon className={`w-5 h-5 text-${action.color}-600`} />
+            {quickActions.map((action, idx) => (
+              <button 
+                key={idx} 
+                onClick={() => handleQuickAction(action.path)}
+                className="w-full flex items-center gap-3 p-3 rounded-lg border border-slate-100 hover:bg-slate-50 transition-all group text-left"
+              >
+                <div className={`
+                  p-2 rounded-md transition-colors
+                  ${action.color === 'blue' ? 'bg-blue-50 group-hover:bg-blue-100 text-blue-600' : ''}
+                  ${action.color === 'green' ? 'bg-green-50 group-hover:bg-green-100 text-green-600' : ''}
+                  ${action.color === 'orange' ? 'bg-orange-50 group-hover:bg-orange-100 text-orange-600' : ''}
+                  ${action.color === 'purple' ? 'bg-purple-50 group-hover:bg-purple-100 text-purple-600' : ''}
+                `}>
+                  <action.icon className="w-5 h-5" />
                 </div>
                 <span className="font-medium text-slate-700">{action.label}</span>
               </button>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Building2, Home, Search, Plus, Filter, MoreVertical, 
   Edit, Trash2, Eye, X, MapPin, FileText, Calendar, AlertCircle
@@ -9,6 +9,7 @@ import PropertyForm from './PropertyForm';
 
 export default function PropertiesList() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -20,6 +21,14 @@ export default function PropertiesList() {
   useEffect(() => {
     loadProperties();
   }, []);
+
+  useEffect(() => {
+    if (location.state?.openModal) {
+      setSelectedProperty(null);
+      setShowModal(true);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   const loadProperties = async () => {
     setLoading(true);
@@ -213,7 +222,7 @@ export default function PropertiesList() {
                     </p>
                   </div>
                   
-                  {/* Menu de Ações */}
+                  {/* Action Menu */}
                   <div className="relative group/menu">
                     <button className="p-1.5 hover:bg-slate-100 rounded-full transition-colors">
                       <MoreVertical className="w-5 h-5 text-slate-400" />

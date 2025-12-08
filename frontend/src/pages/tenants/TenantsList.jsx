@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   User, Search, Plus, MoreVertical, 
   Edit, Trash2, Eye, MapPin, Phone, Mail, AlertCircle, CheckCircle, XCircle
@@ -12,8 +12,8 @@ import CityFilter from '../../components/CityFilter';
 
 export default function TenantsList() {
   const navigate = useNavigate();
+  const location = useLocation();
   
-  {/* State Management */}
   const [tenants, setTenants] = useState([]);
   const [states, setStates] = useState([]);
   const [activeTenantIds, setActiveTenantIds] = useState(new Set());
@@ -26,6 +26,14 @@ export default function TenantsList() {
   
   const [showModal, setShowModal] = useState(false);
   const [selectedTenant, setSelectedTenant] = useState(null);
+
+  useEffect(() => {
+    if (location.state?.openModal) {
+      setSelectedTenant(null);
+      setShowModal(true);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   {/* Initial Data Loading */}
   useEffect(() => {

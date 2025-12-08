@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Plus, Search, Filter, FileText, Calendar, 
   AlertTriangle, CheckCircle, XCircle, ArrowRight, Eye 
@@ -8,6 +8,7 @@ import { leaseService } from '../../services/leaseService';
 
 export default function LeasesList() {
   const navigate = useNavigate();
+  const location = useLocation(); 
 
   {/* State Management */}
   const [leases, setLeases] = useState([]);
@@ -16,6 +17,12 @@ export default function LeasesList() {
   
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+
+  useEffect(() => {
+    if (location.state?.openModal) {
+      navigate('/dashboard/leases/new', { replace: true });
+    }
+  }, [location, navigate]);
 
   {/* Load Data */}
   useEffect(() => {
