@@ -1,6 +1,6 @@
 import { 
   Home, Building2, Users, DollarSign, Wrench, Calendar, 
-  Settings, LogOut 
+  Settings, LogOut, ShieldCheck
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '../services/authService';
@@ -18,9 +18,10 @@ export default function Sidebar({ isOpen }) {
     { icon: Home, label: 'Dashboard', path: '/dashboard' },
     { icon: Building2, label: 'Imóveis', path: '/dashboard/properties' },
     { icon: Users, label: 'Inquilinos', path: '/dashboard/tenants' },
+    { icon: ShieldCheck, label: 'Fiadores', path: '/dashboard/guarantors' },
+    { icon: Calendar, label: 'Contratos', path: '/dashboard/leases' },
     { icon: DollarSign, label: 'Pagamentos', path: '/dashboard/payments' },
-    { icon: Wrench, label: 'Manutenções', path: '/dashboard/maintenance' },
-    { icon: Calendar, label: 'Contratos', path: '/dashboard/leases' }
+    { icon: Wrench, label: 'Manutenções', path: '/dashboard/maintenance' }
   ];
 
   return (
