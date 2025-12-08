@@ -39,7 +39,7 @@ export default function PaymentModal({ lease, referenceDate, onClose, onSuccess 
         amountPaid: parseFloat(formData.amountPaid),
         paymentDate: formData.paymentDate,
         paymentMethod: formData.paymentMethod,
-        referenceMonth: referenceDate.getMonth() + 1, // JS Month is 0-indexed
+        referenceMonth: referenceDate.getMonth() + 1,
         referenceYear: referenceDate.getFullYear(),
         lateFees: parseFloat(formData.lateFees),
         notes: formData.notes

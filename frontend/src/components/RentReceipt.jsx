@@ -54,7 +54,7 @@ const RentReceipt = React.forwardRef(({ data, onReadyToPrint }, ref) => {
   }, [data, onReadyToPrint]);
 
   return (
-    <div ref={ref} className="p-6 font-sans text-black bg-white print-source w-full max-w-[1000px] mx-auto text-lg">
+    <div ref={ref} className="p-6 font-sans text-black bg-white print-source w-full max-w-[1000px] mx-auto text-xl">
       
       {!data ? (
         <div className="text-center p-10">Carregando...</div>
@@ -66,18 +66,18 @@ const RentReceipt = React.forwardRef(({ data, onReadyToPrint }, ref) => {
             
             {/* Header Box */}
             <div className="border-b border-black p-1 bg-gray-100 text-center h-[50px] flex flex-col justify-center">
-              <h1 className="font-bold text-lg uppercase">Recibo de Aluguel e Rateio de Despesas</h1>
-              <div className="font-bold text-lg">{refText}</div>
+              <h1 className="font-bold text-xl uppercase">Recibo de Aluguel e Rateio de Despesas</h1>
+              <div className="font-bold text-xl">{refText}</div>
             </div>
 
             {/* Due Date & Period Row */}
             <div className="border-b border-black flex h-[40px]">
-                <div className="w-1/2 border-r border-black p-1 flex items-center justify-center text-lg">
+                <div className="w-1/2 border-r border-black p-1 flex items-center justify-center text-xl">
                     <span className="font-bold mr-1">Vencimento:</span> dia {dueDay}
                 </div>
                 <div className="w-1/2 p-1 flex flex-col items-center justify-center leading-tight">
-                    <span className="text-[14px]">correspondente ao periodo:</span>
-                    <span className="font-bold text-lg">{periodStart} à {periodEnd}</span>
+                    <span className="text-[16px]">correspondente ao periodo:</span>
+                    <span className="font-bold text-xl">{periodStart} à {periodEnd}</span>
                 </div>
             </div>
 
@@ -95,7 +95,7 @@ const RentReceipt = React.forwardRef(({ data, onReadyToPrint }, ref) => {
             <div className="border-b border-black p-2 flex flex-col justify-end h-[55px]">
               <div className="flex items-end gap-2 w-full">
                 <span className="font-bold whitespace-nowrap">A importância de:</span>
-                <span className="italic border-b border-dotted border-gray-400 flex-grow text-center pb-0.5 text-lg leading-tight truncate">
+                <span className="italic border-b border-dotted border-gray-400 flex-grow text-center pb-0.5 text-xl leading-tight truncate">
                   {amountInWords}
                 </span>
               </div>
@@ -104,8 +104,8 @@ const RentReceipt = React.forwardRef(({ data, onReadyToPrint }, ref) => {
             {/* Property Info */}
             <div className="p-2 flex flex-col justify-center h-[55px]">
               <div className="flex items-end gap-2 w-full">
-                <span className="font-bold text-lg whitespace-nowrap mb-0.5">Referente ao Aluguel e despesas:</span>
-                <div className="flex-grow border-b border-dotted border-gray-400 pb-0.5 text-center text-lg flex justify-between px-1">
+                <span className="font-bold text-xl whitespace-nowrap mb-0.5">Referente ao Aluguel e despesas:</span>
+                <div className="flex-grow border-b border-dotted border-gray-400 pb-0.5 text-center text-xl flex justify-between px-1">
                    <span className="truncate max-w-[220px]">{property?.address?.split(',')[0]}</span> 
                    <span>{property?.addressComplement || `Nº ${property?.address?.split(',')[1] || ''}`}</span>
                 </div>
@@ -118,7 +118,7 @@ const RentReceipt = React.forwardRef(({ data, onReadyToPrint }, ref) => {
           <div className="w-[35%] flex flex-col justify-between">
             
             <div className="flex-grow pt-2">
-                <div className="text-lg">
+                <div className="text-xl">
                     <div className="flex justify-between items-center px-3 h-[28px] border-b border-gray-200">
                         <span>Aluguel</span>
                         <div className="font-bold">R$ {formatMoney(valRent)}</div>
@@ -142,7 +142,7 @@ const RentReceipt = React.forwardRef(({ data, onReadyToPrint }, ref) => {
 
                 {/* Total Box */}
                 <div className="bg-gray-100 flex justify-between items-center font-bold px-3 h-[40px] border-b border-black mt-2">
-                    <span className="text-lg uppercase">Total Pago</span>
+                    <span className="text-xl uppercase">Total Pago</span>
                     <div className="text-base">R$ {formatMoney(valTotal)}</div>
                 </div>
             </div>

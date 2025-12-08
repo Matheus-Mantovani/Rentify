@@ -35,10 +35,6 @@ public class LeaseGuarantorService {
 
     @Transactional
     public LeaseGuarantorResponseDTO createLeaseGuarantor(LeaseGuarantorRequestDTO requestDTO) {
-        System.out.println("=========================================11111111111");
-        System.out.println(requestDTO.leaseGuarantorStatus());
-        System.out.println("=========================================");
-
         if(!leaseRepository.existsById(requestDTO.leaseId())) {
             throw new IllegalArgumentException("Lease not found with id: " + requestDTO.leaseId());
         }
@@ -52,15 +48,7 @@ public class LeaseGuarantorService {
 
         LeaseGuarantor leaseGuarantor = leaseGuarantorMapper.toEntity(requestDTO);
 
-        System.out.println("=========================================222222222");
-        System.out.println(leaseGuarantor.getLeaseGuarantorStatus());
-        System.out.println("=========================================");
-
         LeaseGuarantor savedLeaseGuarantor = leaseGuarantorRepository.save(leaseGuarantor);
-
-        System.out.println("=========================================");
-        System.out.println(savedLeaseGuarantor.getLeaseGuarantorStatus());
-        System.out.println("=========================================");
 
         return leaseGuarantorMapper.toResponseDTO(savedLeaseGuarantor);
     }

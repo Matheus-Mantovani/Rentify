@@ -18,6 +18,10 @@ import PropertyDetails from './pages/properties/PropertyDetails';
 import TenantsList from './pages/tenants/TenantsList';
 import TenantDetails from './pages/tenants/TenantDetails';
 import PaymentsList from './pages/payments/PaymentsList';
+import LeasesList from './pages/leases/LeasesList';
+import LeaseForm from './pages/leases/LeaseForm';
+import LeaseDetails from './pages/leases/LeaseDetails';
+import MaintenanceList from './pages/maintenance/MaintenanceList';
 
 function App() {
   return (
@@ -44,6 +48,10 @@ function App() {
           <Route path="tenants" element={<TenantsList />} />
           <Route path="tenants/:id" element={<TenantDetails />} />
           <Route path="payments" element={<PaymentsList />} />
+          <Route path="leases" element={<LeasesList />} />
+          <Route path="leases/new" element={<LeaseForm />} />
+          <Route path="leases/:id" element={<LeaseDetails />} />
+          <Route path="maintenance" element={<MaintenanceList />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
