@@ -2,6 +2,7 @@ package com.matheus.rentify.app.leases.dto.response;
 
 import com.matheus.rentify.app.leases.model.LeaseStatusEnum;
 import com.matheus.rentify.app.leases.model.MoveOutConditionEnum;
+import com.matheus.rentify.app.people.dto.response.TenantDetailsResponseDTO;
 import com.matheus.rentify.app.people.dto.response.TenantResponseDTO;
 import com.matheus.rentify.app.properties.dto.response.PropertyResponseDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,7 +26,7 @@ public record LeaseResponseDTO(
         PropertyResponseDTO property,
 
         @Schema(description = "Summary of the tenant on the lease.")
-        TenantResponseDTO tenant,
+        TenantDetailsResponseDTO tenant,
 
         @Schema(description = "Name of the property owner/landlord.", example = "Carlos Souza")
         String landlordName,

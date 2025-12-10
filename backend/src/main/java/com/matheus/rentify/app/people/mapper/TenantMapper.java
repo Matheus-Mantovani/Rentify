@@ -21,7 +21,8 @@ public abstract class TenantMapper {
 
     @Mappings({
             @Mapping(target = "city", source = "cityId"),
-            @Mapping(target = "id", ignore = true)
+            @Mapping(target = "id", ignore = true),
+            @Mapping(target = "deletedAt", ignore = true)
     })
     public abstract Tenant toEntity(TenantRequestDTO dto);
 
@@ -39,7 +40,8 @@ public abstract class TenantMapper {
 
     @Mappings({
             @Mapping(target = "city", source = "cityId"),
-            @Mapping(target = "id", ignore = true)
+            @Mapping(target = "id", ignore = true),
+            @Mapping(target = "deletedAt", ignore = true)
     })
     public abstract void updateEntityFromDto(TenantRequestDTO dto, @MappingTarget Tenant entity);
 
