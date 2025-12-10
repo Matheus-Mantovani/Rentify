@@ -16,6 +16,11 @@ export const propertyService = {
     return response.data;
   },
 
+  getPropertyValuationHistory: async (id) => {
+    const response = await api.get(`/api/history/properties/${id}/valuations`);
+    return response.data;
+  },
+
   createProperty: async (data) => {
     const response = await api.post('/api/properties', data);
     return response.data;
