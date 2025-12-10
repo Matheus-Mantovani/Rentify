@@ -17,7 +17,7 @@ export const reportService = {
     return response.data;
   },
   
-  getExpiringLeases: async (days = 30) => {
+  getExpiringLeases: async (days = 60) => {
       const response = await api.get('/api/reports/leases/expiring', { params: { days } });
       return response.data;
   },
