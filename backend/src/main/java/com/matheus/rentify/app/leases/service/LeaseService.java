@@ -1,12 +1,12 @@
 package com.matheus.rentify.app.leases.service;
 
-import com.matheus.rentify.app.leases.model.LeaseStatusEnum;
-import com.matheus.rentify.app.leases.model.MoveOutConditionEnum;
 import com.matheus.rentify.app.leases.dto.request.LeaseRequestDTO;
 import com.matheus.rentify.app.leases.dto.request.LeaseTerminationRequestDTO;
 import com.matheus.rentify.app.leases.dto.response.LeaseResponseDTO;
 import com.matheus.rentify.app.leases.mapper.LeaseMapper;
 import com.matheus.rentify.app.leases.model.Lease;
+import com.matheus.rentify.app.leases.model.LeaseStatusEnum;
+import com.matheus.rentify.app.leases.model.MoveOutConditionEnum;
 import com.matheus.rentify.app.leases.repository.LeaseRepository;
 import com.matheus.rentify.app.properties.model.Property;
 import com.matheus.rentify.app.properties.model.PropertyStatusEnum;
@@ -38,9 +38,11 @@ public class LeaseService {
         Lease lease = leaseMapper.toEntity(requestDTO);
         Property property = findPropertyByIdOrThrow(requestDTO.propertyId());
 
-        if(property.getStatus() != PropertyStatusEnum.AVAILABLE) {
+        if (property.getStatus() != PropertyStatusEnum.AVAILABLE) {
             throw new IllegalStateException("Property with id: " + property.getId() + " is not available. Current status: " + property.getStatus());
         }
+
+        snapshotLandlordName(lease);
 
         updateMonetaryWords(lease);
 
@@ -52,21 +54,21 @@ public class LeaseService {
     }
 
     @Transactional(readOnly = true)
-    public List<LeaseResponseDTO> getAll(LeaseStatusEnum status, Long tenantId) {
+    public List<LeaseResponseDTO> getAll(LeaseStatusEnum status, Long tenantId, Long landlordProfileId) {
         List<Lease> leases;
 
         if (tenantId != null) {
             leases = leaseRepository.findByTenantId(tenantId);
-
-            if (status != null) {
-                leases = leases.stream()
-                        .filter(l -> l.getStatus() == status)
-                        .toList();
-            }
-        } else if (status != null) {
-            leases = leaseRepository.findAllByStatus(status);
+        } else if (landlordProfileId != null) {
+            leases = leaseRepository.findByLandlordProfileId(landlordProfileId);
         } else {
             leases = leaseRepository.findAll();
+        }
+
+        if (status != null) {
+            leases = leases.stream()
+                    .filter(l -> l.getStatus() == status)
+                    .toList();
         }
 
         return leases.stream()
@@ -86,6 +88,8 @@ public class LeaseService {
 
         leaseMapper.updateEntityFromDto(requestDTO, existingLease);
 
+        snapshotLandlordName(existingLease);
+
         updateMonetaryWords(existingLease);
 
         Lease updatedLease = leaseRepository.save(existingLease);
@@ -102,7 +106,7 @@ public class LeaseService {
         }
 
         Property property = lease.getProperty();
-        if(requestDTO.moveOutCondition() == MoveOutConditionEnum.NEEDS_REPAIRS) {
+        if (requestDTO.moveOutCondition() == MoveOutConditionEnum.NEEDS_REPAIRS) {
             property.setStatus(PropertyStatusEnum.UNDER_MAINTENANCE);
         } else {
             property.setStatus(PropertyStatusEnum.AVAILABLE);
@@ -122,6 +126,12 @@ public class LeaseService {
     private Property findPropertyByIdOrThrow(Long id) {
         return propertyRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Property not found with id: " + id));
+    }
+
+    private void snapshotLandlordName(Lease lease) {
+        if (lease.getLandlordProfile() != null) {
+            lease.setLandlordName(lease.getLandlordProfile().getFullName());
+        }
     }
 
     private void updateMonetaryWords(Lease lease) {

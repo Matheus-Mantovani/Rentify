@@ -1,5 +1,6 @@
 package com.matheus.rentify.app.leases.model;
 
+import com.matheus.rentify.app.landlord.model.LandlordProfile;
 import com.matheus.rentify.app.people.model.Tenant;
 import com.matheus.rentify.app.properties.model.Property;
 import jakarta.persistence.*;
@@ -22,12 +23,16 @@ public class Lease {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "property_fk")
+    @JoinColumn(name = "property_fk", nullable = false)
     private Property property;
 
     @ManyToOne
-    @JoinColumn(name = "tenant_fk")
+    @JoinColumn(name = "tenant_fk", nullable = false)
     private Tenant tenant;
+
+    @ManyToOne
+    @JoinColumn(name = "landlord_profile_fk")
+    private LandlordProfile landlordProfile;
 
     @Column(name = "landlord_name", length = 100)
     private String landlordName;

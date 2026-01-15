@@ -15,6 +15,7 @@ public interface LeaseRepository extends JpaRepository<Lease, Long> {
     boolean existsByPropertyId(Long id);
     boolean existsByTenantId(Long id);
     List<Lease> findAllByStatus(LeaseStatusEnum status);
+    List<Lease> findByLandlordProfileId(Long landlordProfileId);
     List<Lease> findByEndDateBetweenAndStatus(LocalDate start, LocalDate end, LeaseStatusEnum status);
     List<Lease> findByTenantId(Long tenantId);
     List<Lease> findByTenantIdAndStatus(Long tenantId, LeaseStatusEnum status);

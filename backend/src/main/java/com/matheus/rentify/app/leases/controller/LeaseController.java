@@ -43,12 +43,13 @@ public class LeaseController {
     }
 
     @GetMapping
-    @Operation(summary = "Get all leases optionally filtered by status or tenant")
+    @Operation(summary = "Get all leases optionally filtered by status, tenant or landlord profile")
     public ResponseEntity<List<LeaseResponseDTO>> getAllLeases(
             @RequestParam(required = false) LeaseStatusEnum status,
-            @RequestParam(required = false) Long tenantId
+            @RequestParam(required = false) Long tenantId,
+            @RequestParam(required = false) Long landlordProfileId
     ) {
-        List<LeaseResponseDTO> leases = leaseService.getAll(status, tenantId);
+        List<LeaseResponseDTO> leases = leaseService.getAll(status, tenantId, landlordProfileId);
         return ResponseEntity.ok(leases);
     }
 

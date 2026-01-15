@@ -1,9 +1,9 @@
 package com.matheus.rentify.app.leases.dto.response;
 
+import com.matheus.rentify.app.landlord.dto.response.LandlordProfileResponseDTO;
 import com.matheus.rentify.app.leases.model.LeaseStatusEnum;
 import com.matheus.rentify.app.leases.model.MoveOutConditionEnum;
 import com.matheus.rentify.app.people.dto.response.TenantDetailsResponseDTO;
-import com.matheus.rentify.app.people.dto.response.TenantResponseDTO;
 import com.matheus.rentify.app.properties.dto.response.PropertyResponseDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -28,7 +28,10 @@ public record LeaseResponseDTO(
         @Schema(description = "Summary of the tenant on the lease.")
         TenantDetailsResponseDTO tenant,
 
-        @Schema(description = "Name of the property owner/landlord.", example = "Carlos Souza")
+        @Schema(description = "Full details of the landlord profile associated with this lease.")
+        LandlordProfileResponseDTO landlordProfile,
+
+        @Schema(description = "Snapshot of the landlord name at the time of signing.", example = "Carlos Souza")
         String landlordName,
 
         @Schema(description = "Day of the month the payment is due.", example = "10")

@@ -1,5 +1,8 @@
 package com.matheus.rentify.app.leases.mapper;
 
+import com.matheus.rentify.app.landlord.mapper.LandlordProfileMapper;
+import com.matheus.rentify.app.landlord.model.LandlordProfile;
+import com.matheus.rentify.app.landlord.repository.LandlordProfileRepository;
 import com.matheus.rentify.app.leases.dto.request.LeaseRequestDTO;
 import com.matheus.rentify.app.leases.dto.request.LeaseTerminationRequestDTO;
 import com.matheus.rentify.app.leases.dto.response.LeaseResponseDTO;
@@ -17,7 +20,7 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.Mappings;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Mapper(componentModel = "spring", uses = {PropertyMapper.class, TenantMapper.class})
+@Mapper(componentModel = "spring", uses = {PropertyMapper.class, TenantMapper.class, LandlordProfileMapper.class})
 public abstract class LeaseMapper {
 
     @Autowired
@@ -25,6 +28,9 @@ public abstract class LeaseMapper {
 
     @Autowired
     protected TenantRepository tenantRepository;
+
+    @Autowired
+    protected LandlordProfileRepository landlordProfileRepository;
 
     @Mappings({
             @Mapping(target = "id", ignore = true),
@@ -35,8 +41,10 @@ public abstract class LeaseMapper {
             @Mapping(target = "moveOutDate", ignore = true),
             @Mapping(target = "moveOutCondition", ignore = true),
             @Mapping(target = "moveOutReason", ignore = true),
+            @Mapping(target = "landlordName", ignore = true), // Handled explicitly in Service
             @Mapping(target = "property", source = "propertyId"),
-            @Mapping(target = "tenant", source = "tenantId")
+            @Mapping(target = "tenant", source = "tenantId"),
+            @Mapping(target = "landlordProfile", source = "landlordProfileId")
     })
     public abstract Lease toEntity(LeaseRequestDTO dto);
 
@@ -51,8 +59,10 @@ public abstract class LeaseMapper {
             @Mapping(target = "moveOutDate", ignore = true),
             @Mapping(target = "moveOutCondition", ignore = true),
             @Mapping(target = "moveOutReason", ignore = true),
+            @Mapping(target = "landlordName", ignore = true), // Should not change automatically on update
             @Mapping(target = "property", source = "propertyId"),
-            @Mapping(target = "tenant", source = "tenantId")
+            @Mapping(target = "tenant", source = "tenantId"),
+            @Mapping(target = "landlordProfile", source = "landlordProfileId")
     })
     public abstract void updateEntityFromDto(LeaseRequestDTO dto, @MappingTarget Lease entity);
 
@@ -61,6 +71,7 @@ public abstract class LeaseMapper {
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "property", ignore = true),
             @Mapping(target = "tenant", ignore = true),
+            @Mapping(target = "landlordProfile", ignore = true),
             @Mapping(target = "landlordName", ignore = true),
             @Mapping(target = "paymentDueDay", ignore = true),
             @Mapping(target = "startDate", ignore = true),
@@ -88,5 +99,13 @@ public abstract class LeaseMapper {
         }
         return tenantRepository.findById(tenantId)
                 .orElseThrow(() -> new EntityNotFoundException("Tenant not found with id: " + tenantId));
+    }
+
+    protected LandlordProfile profileIdToProfile(Long profileId) {
+        if (profileId == null) {
+            throw new IllegalArgumentException("Landlord Profile ID can not be null");
+        }
+        return landlordProfileRepository.findById(profileId)
+                .orElseThrow(() -> new EntityNotFoundException("Landlord Profile not found with id: " + profileId));
     }
 }

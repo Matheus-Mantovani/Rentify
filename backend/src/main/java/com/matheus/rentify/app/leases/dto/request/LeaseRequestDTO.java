@@ -19,9 +19,9 @@ public record LeaseRequestDTO(
         @NotNull(message = "Tenant ID cannot be null.")
         Long tenantId,
 
-        @Schema(description = "Name of the property owner/landlord.", example = "Carlos Souza")
-        @Size(max = 100, message = "Landlord name cannot exceed 100 characters.")
-        String landlordName,
+        @Schema(description = "ID of the landlord profile signing the lease.", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotNull(message = "Landlord Profile ID cannot be null.")
+        Long landlordProfileId,
 
         @Schema(description = "Day of the month the payment is due (1-31).", example = "10", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "Payment due day cannot be null.")
@@ -29,12 +29,12 @@ public record LeaseRequestDTO(
         @Max(value = 31, message = "Day must be at most 31.")
         Integer paymentDueDay,
 
-        @Schema(description = "The date the lease agreement begins. Cannot be in the past.", example = "01-11-2025", requiredMode = Schema.RequiredMode.REQUIRED)
+        @Schema(description = "The date the lease agreement begins. Cannot be in the past.", example = "2025-11-01", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "Start date cannot be null.")
         @FutureOrPresent(message = "Start date cannot be in the past.")
         LocalDate startDate,
 
-        @Schema(description = "The date the lease agreement ends.", example = "31-10-2026", requiredMode = Schema.RequiredMode.REQUIRED)
+        @Schema(description = "The date the lease agreement ends.", example = "2026-10-31", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "End date cannot be null.")
         LocalDate endDate,
 
