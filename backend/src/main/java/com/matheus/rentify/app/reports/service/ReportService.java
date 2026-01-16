@@ -1,5 +1,7 @@
 package com.matheus.rentify.app.reports.service;
 
+import com.matheus.rentify.app.landlord.model.LandlordProfile;
+import com.matheus.rentify.app.landlord.repository.LandlordProfileRepository;
 import com.matheus.rentify.app.leases.model.Lease;
 import com.matheus.rentify.app.leases.model.LeaseStatusEnum;
 import com.matheus.rentify.app.leases.model.Payment;
@@ -11,6 +13,7 @@ import com.matheus.rentify.app.properties.repository.MaintenanceJobRepository;
 import com.matheus.rentify.app.properties.repository.PropertyRepository;
 import com.matheus.rentify.app.reports.dto.response.*;
 import com.matheus.rentify.app.reports.model.ActivityTypeEnum;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.YearMonth;
+import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,13 +35,56 @@ public class ReportService {
     private final PaymentRepository paymentRepository;
     private final MaintenanceJobRepository maintenanceJobRepository;
     private final LeaseRepository leaseRepository;
+    private final LandlordProfileRepository landlordRepository; // Nova injeção
 
     @Autowired
-    public ReportService(PropertyRepository propertyRepository, PaymentRepository paymentRepository, MaintenanceJobRepository maintenanceJobRepository, LeaseRepository leaseRepository) {
+    public ReportService(PropertyRepository propertyRepository,
+                         PaymentRepository paymentRepository,
+                         MaintenanceJobRepository maintenanceJobRepository,
+                         LeaseRepository leaseRepository,
+                         LandlordProfileRepository landlordRepository) {
         this.propertyRepository = propertyRepository;
         this.paymentRepository = paymentRepository;
         this.maintenanceJobRepository = maintenanceJobRepository;
         this.leaseRepository = leaseRepository;
+        this.landlordRepository = landlordRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public AnnualIncomeReportResponseDTO generateAnnualIncomeReport(Long landlordId, int year) {
+        LandlordProfile profile = landlordRepository.findById(landlordId)
+                .orElseThrow(() -> new EntityNotFoundException("Landlord Profile not found"));
+
+        List<Object[]> rawData = paymentRepository.findMonthlyIncomeByLandlordAndYear(landlordId, year);
+
+        Map<Integer, BigDecimal> incomeMap = rawData.stream()
+                .collect(Collectors.toMap(
+                        row -> (Integer) row[0],
+                        row -> (BigDecimal) row[1]
+                ));
+
+        List<MonthlyFinancialDataDTO> monthlyData = new ArrayList<>();
+        BigDecimal yearTotal = BigDecimal.ZERO;
+
+        Locale brLocale = new Locale("pt", "BR");
+
+        for (int i = 1; i <= 12; i++) {
+            BigDecimal income = incomeMap.getOrDefault(i, BigDecimal.ZERO);
+            String monthName = Month.of(i).getDisplayName(TextStyle.FULL, brLocale);
+
+            monthName = monthName.substring(0, 1).toUpperCase() + monthName.substring(1);
+
+            monthlyData.add(new MonthlyFinancialDataDTO(i, monthName, income));
+            yearTotal = yearTotal.add(income);
+        }
+
+        return new AnnualIncomeReportResponseDTO(
+                year,
+                profile.getId(),
+                profile.getFullName(),
+                yearTotal,
+                monthlyData
+        );
     }
 
     @Transactional(readOnly = true)
@@ -90,8 +138,8 @@ public class ReportService {
                 maintenanceProps,
                 currentRevenue,
                 outstandingMaintenance,
-                revenueChange,      // Novo
-                occupancyChange     // Novo
+                revenueChange,
+                occupancyChange
         );
     }
 

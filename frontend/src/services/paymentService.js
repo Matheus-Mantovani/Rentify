@@ -1,7 +1,7 @@
 import api from './api';
 
 export const paymentService = {
-  // GET /api/payments?leaseId=... OR ?tenantId=...
+  // GET /api/payments?leaseId=...&landlordProfileId=...
   getAllPayments: async (filters = {}) => {
     const response = await api.get('/api/payments', { params: filters });
     return response.data;
@@ -16,6 +16,12 @@ export const paymentService = {
   // POST /api/payments
   createPayment: async (data) => {
     const response = await api.post('/api/payments', data);
+    return response.data;
+  },
+
+  // PUT /api/payments/{id}
+  updatePayment: async (id, data) => {
+    const response = await api.put(`/api/payments/${id}`, data);
     return response.data;
   },
   

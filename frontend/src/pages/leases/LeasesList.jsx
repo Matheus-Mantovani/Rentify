@@ -1,16 +1,15 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { 
   Plus, Search, Filter, FileText, Calendar, 
-  AlertTriangle, CheckCircle, XCircle, ArrowRight, Eye 
+  AlertTriangle, CheckCircle, XCircle, Eye, Printer 
 } from 'lucide-react';
 import { leaseService } from '../../services/leaseService';
+import ContractModal from '../../components/ContractModal';
 
 export default function LeasesList() {
   const navigate = useNavigate();
-  const location = useLocation(); 
 
-  {/* State Management */}
   const [leases, setLeases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -18,30 +17,26 @@ export default function LeasesList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
-  useEffect(() => {
-    if (location.state?.openModal) {
-      navigate('/dashboard/leases/new', { replace: true });
-    }
-  }, [location, navigate]);
+  const [selectedLeaseForContract, setSelectedLeaseForContract] = useState(null);
+  const [showContractModal, setShowContractModal] = useState(false);
 
-  {/* Load Data */}
+  const fetchLeases = async () => {
+    setLoading(true);
+    try {
+      const data = await leaseService.getAllLeases(); 
+      setLeases(data);
+    } catch (err) {
+      console.error(err);
+      setError('Erro ao carregar contratos.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchLeases = async () => {
-      setLoading(true);
-      try {
-        const data = await leaseService.getAllLeases(); 
-        setLeases(data);
-      } catch (err) {
-        console.error(err);
-        setError('Erro ao carregar contratos.');
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchLeases();
   }, []);
 
-  {/* Filtering Logic */}
   const filteredLeases = useMemo(() => {
     return leases.filter(lease => {
       const term = searchTerm.toLowerCase();
@@ -56,9 +51,15 @@ export default function LeasesList() {
     });
   }, [leases, searchTerm, statusFilter]);
 
-  {/* Helpers */}
-  const formatMoney = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
-  const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString('pt-BR');
+  const formatMoney = (val) => {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '-';
+    const [year, month, day] = dateStr.split('-');
+    return new Date(year, month - 1, day).toLocaleDateString('pt-BR');
+  };
 
   const isExpiringSoon = (endDate, status) => {
     if (status !== 'ACTIVE') return false;
@@ -69,10 +70,14 @@ export default function LeasesList() {
     return diffDays <= 30 && diffDays >= 0;
   };
 
+  const handleOpenContract = (lease) => {
+    setSelectedLeaseForContract(lease);
+    setShowContractModal(true);
+  };
+
   return (
     <div className="p-6 space-y-6">
       
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Contratos de Locação</h1>
@@ -87,7 +92,6 @@ export default function LeasesList() {
         </button>
       </div>
 
-      {/* Filters Toolbar */}
       <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col md:flex-row gap-4">
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -113,9 +117,10 @@ export default function LeasesList() {
         </div>
       </div>
 
-      {/* Data Table */}
       {loading ? (
-        <div className="flex justify-center h-40 items-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>
+        <div className="flex justify-center h-40 items-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
       ) : (
         <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
           <table className="w-full text-sm text-left">
@@ -130,9 +135,12 @@ export default function LeasesList() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredLeases.length === 0 ? (
-                 <tr><td colSpan="5" className="p-8 text-center text-slate-500">Nenhum contrato encontrado.</td></tr>
+                 <tr>
+                    <td colSpan="5" className="p-8 text-center text-slate-500">Nenhum contrato encontrado.</td>
+                 </tr>
               ) : filteredLeases.map((lease) => (
                 <tr key={lease.id} className="hover:bg-slate-50 transition-colors group">
+                  
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
@@ -168,25 +176,31 @@ export default function LeasesList() {
                   </td>
 
                   <td className="px-6 py-4 text-center">
-                    {lease.status === 'ACTIVE' ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 gap-1">
-                            <CheckCircle className="w-3 h-3" /> Ativo
-                        </span>
-                    ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 gap-1">
-                            <XCircle className="w-3 h-3" /> Encerrado
-                        </span>
-                    )}
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium gap-1 
+                        ${lease.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-600'}`}>
+                        {lease.status === 'ACTIVE' ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                        {lease.status === 'ACTIVE' ? 'Ativo' : 'Encerrado'}
+                    </span>
                   </td>
 
                   <td className="px-6 py-4 text-right">
-                    <button 
-                        onClick={() => navigate(`/dashboard/leases/${lease.id}`)}
-                        className="text-slate-400 hover:text-blue-600 transition-colors p-2 hover:bg-blue-50 rounded-full"
-                        title="Ver Detalhes"
-                    >
-                        <Eye className="w-5 h-5" />
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                        <button 
+                            onClick={() => handleOpenContract(lease)}
+                            className="text-slate-400 hover:text-blue-600 transition-colors p-2 hover:bg-blue-50 rounded-full"
+                            title="Imprimir Contrato"
+                        >
+                            <Printer className="w-5 h-5" />
+                        </button>
+
+                        <button 
+                            onClick={() => navigate(`/dashboard/leases/${lease.id}`)}
+                            className="text-slate-400 hover:text-blue-600 transition-colors p-2 hover:bg-blue-50 rounded-full"
+                            title="Ver Detalhes"
+                        >
+                            <Eye className="w-5 h-5" />
+                        </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -194,6 +208,12 @@ export default function LeasesList() {
           </table>
         </div>
       )}
+
+      <ContractModal 
+        isOpen={showContractModal}
+        onClose={() => setShowContractModal(false)}
+        lease={selectedLeaseForContract}
+      />
     </div>
   );
 }

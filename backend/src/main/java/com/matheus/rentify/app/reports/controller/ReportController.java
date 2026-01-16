@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -20,6 +21,19 @@ public class ReportController {
     @Autowired
     public ReportController(ReportService reportService) {
         this.reportService = reportService;
+    }
+
+    @GetMapping("/annual-income")
+    @Operation(summary = "Get annual income report for a specific landlord profile")
+    public ResponseEntity<AnnualIncomeReportResponseDTO> getAnnualIncome(
+            @RequestParam Long landlordProfileId,
+            @RequestParam(required = false) Integer year
+    ) {
+        int targetYear = (year != null) ? year : LocalDate.now().getYear();
+
+        AnnualIncomeReportResponseDTO report = reportService.generateAnnualIncomeReport(landlordProfileId, targetYear);
+
+        return ResponseEntity.ok(report);
     }
 
     @GetMapping("/dashboard-summary")

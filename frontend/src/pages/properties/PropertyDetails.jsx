@@ -37,6 +37,11 @@ export default function PropertyDetails() {
     INACTIVE: 'Inativo'
   };
 
+  const leaseStatusLabels = {
+    ACTIVE: 'Vigente',
+    TERMINATED: 'Encerrado'
+  };
+
   const conditionLabels = {
     EXCELLENT: 'Excelente',
     GOOD: 'Bom',
@@ -89,6 +94,7 @@ export default function PropertyDetails() {
             const dateObj = new Date(year, month - 1, day);
             return {
               ...item,
+              year: parseInt(year),
               dateFormatted: dateObj.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' }),
               timestamp: dateObj.getTime(),
               propertyValue: item.propertyValue
@@ -186,6 +192,10 @@ export default function PropertyDetails() {
   const filteredCosts = selectedYear === 'ALL' 
     ? financialHistory 
     : financialHistory.filter(item => item.year === parseInt(selectedYear));
+
+  const filteredValuations = selectedYear === 'ALL'
+    ? valuationHistory
+    : valuationHistory.filter(item => item.year === parseInt(selectedYear));
 
   if (loading) return (
     <div className="flex items-center justify-center h-screen">
@@ -392,7 +402,7 @@ export default function PropertyDetails() {
                         <div className="h-[300px]">
                             {valuationHistory.length > 0 ? (
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <LineChart data={valuationHistory} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                                    <LineChart data={filteredValuations} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                                         <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                                         <XAxis dataKey="dateFormatted" stroke="#94a3b8" tick={{fontSize: 12}} />
                                         <YAxis stroke="#94a3b8" tick={{fontSize: 12}} tickFormatter={(val) => `R$${val/1000}k`} width={80} />

@@ -23,4 +23,29 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     @Query("SELECT p.lease.id FROM Payment p WHERE p.referenceMonth = :month AND p.referenceYear = :year")
     List<Long> findLeaseIdsWithPaymentInMonth(@Param("month") int month, @Param("year") int year);
+
+    @Query("""
+        SELECT p FROM Payment p
+        JOIN FETCH p.lease l
+        LEFT JOIN FETCH l.property prop
+        LEFT JOIN FETCH l.tenant t
+        WHERE l.landlordProfile.id = :landlordId
+        ORDER BY p.paymentDate DESC
+    """)
+    List<Payment> findByLandlordProfileId(@Param("landlordId") Long landlordId);
+
+    @Query("""
+        SELECT 
+            MONTH(p.paymentDate) as mes, 
+            SUM(p.amountPaid) as total 
+        FROM Payment p 
+        WHERE p.lease.landlordProfile.id = :landlordId 
+          AND YEAR(p.paymentDate) = :year 
+        GROUP BY MONTH(p.paymentDate)
+        ORDER BY MONTH(p.paymentDate) ASC
+    """)
+    List<Object[]> findMonthlyIncomeByLandlordAndYear(
+            @Param("landlordId") Long landlordId,
+            @Param("year") int year
+    );
 }

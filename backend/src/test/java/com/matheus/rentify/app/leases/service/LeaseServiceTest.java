@@ -1,5 +1,9 @@
 package com.matheus.rentify.app.leases.service;
 
+import com.matheus.rentify.app.auth.model.User;
+import com.matheus.rentify.app.auth.repository.UserRepository;
+import com.matheus.rentify.app.landlord.model.LandlordProfile;
+import com.matheus.rentify.app.landlord.repository.LandlordProfileRepository;
 import com.matheus.rentify.app.leases.dto.request.LeaseRequestDTO;
 import com.matheus.rentify.app.leases.dto.request.LeaseTerminationRequestDTO;
 import com.matheus.rentify.app.leases.dto.response.LeaseResponseDTO;
@@ -7,6 +11,7 @@ import com.matheus.rentify.app.leases.model.Lease;
 import com.matheus.rentify.app.leases.model.LeaseStatusEnum;
 import com.matheus.rentify.app.leases.model.MoveOutConditionEnum;
 import com.matheus.rentify.app.leases.repository.LeaseRepository;
+import com.matheus.rentify.app.people.model.MaritalStatusEnum;
 import com.matheus.rentify.app.people.model.Tenant;
 import com.matheus.rentify.app.people.repository.TenantRepository;
 import com.matheus.rentify.app.properties.model.Property;
@@ -52,17 +57,27 @@ class LeaseServiceTest {
     @Autowired
     private StateRepository stateRepository;
 
+    @Autowired
+    private LandlordProfileRepository landlordProfileRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
     private Property testProperty;
     private Tenant testTenant;
     private City testCity;
     private State testState;
+    private LandlordProfile testLandlordProfile;
 
     @BeforeEach
     void setUp() {
         leaseRepository.deleteAll();
         propertyRepository.deleteAll();
         tenantRepository.deleteAll();
+        landlordProfileRepository.deleteAll();
+        userRepository.deleteAll();
 
+        // 1. Setup Basic Location
         testState = new State();
         testState.setStateCode("SP");
         testState.setStateName("São Paulo");
@@ -73,12 +88,14 @@ class LeaseServiceTest {
         testCity.setState(testState);
         cityRepository.save(testCity);
 
+        // 2. Setup Tenant
         testTenant = new Tenant();
         testTenant.setFullName("Test Tenant");
         testTenant.setCpf("12345678901");
         testTenant.setCity(testCity);
         tenantRepository.save(testTenant);
 
+        // 3. Setup Property
         testProperty = new Property();
         testProperty.setAddress("123 Test St");
         testProperty.setNeighborhood("Test Neighborhood");
@@ -86,20 +103,47 @@ class LeaseServiceTest {
         testProperty.setCity(testCity);
         testProperty.setStatus(PropertyStatusEnum.AVAILABLE);
         propertyRepository.save(testProperty);
+
+        // 4. Setup Landlord Profile
+        User user = new User();
+        user.setUsername("landlord_test");
+        user.setPassword("password");
+        user.setEmail("test@landlord.com");
+        user.setFullName("Test Landlord User");
+        userRepository.save(user);
+
+        testLandlordProfile = new LandlordProfile();
+        testLandlordProfile.setUser(user);
+        testLandlordProfile.setProfileAlias("My Holding");
+        testLandlordProfile.setFullName("Test Landlord LLC");
+        testLandlordProfile.setCpfCnpj("12345678000199");
+        testLandlordProfile.setNationality("Brazilian");
+        testLandlordProfile.setMaritalStatus(MaritalStatusEnum.SINGLE);
+        testLandlordProfile.setProfession("Investor");
+        testLandlordProfile.setRg("1234567");
+        testLandlordProfile.setFullAddress("Street A, 123");
+        landlordProfileRepository.save(testLandlordProfile);
     }
 
     @Test
     void createLease_ShouldChangePropertyStatusToRented_WhenPropertyIsAvailable() {
         LeaseRequestDTO requestDTO = new LeaseRequestDTO(
-                testProperty.getId(), testTenant.getId(), "Test Landlord",
-                10, LocalDate.now().plusDays(1), LocalDate.now().plusYears(1),
-                new BigDecimal("1500.00"), null, null
+                testProperty.getId(),
+                testTenant.getId(),
+                testLandlordProfile.getId(),
+                10,
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusYears(1),
+                new BigDecimal("1500.00"),
+                null,
+                null
         );
 
         LeaseResponseDTO createdDto = leaseService.createLease(requestDTO);
 
         assertThat(createdDto.id()).isNotNull();
         assertThat(createdDto.status()).isEqualTo(LeaseStatusEnum.ACTIVE);
+        assertThat(createdDto.landlordName()).isEqualTo("Test Landlord LLC");
 
         assertThat(leaseRepository.findById(createdDto.id())).isPresent();
 
@@ -113,9 +157,15 @@ class LeaseServiceTest {
         propertyRepository.save(testProperty);
 
         LeaseRequestDTO requestDTO = new LeaseRequestDTO(
-                testProperty.getId(), testTenant.getId(), "Test Landlord",
-                10, LocalDate.now().plusDays(1), LocalDate.now().plusYears(1),
-                new BigDecimal("1500.00"), null, null
+                testProperty.getId(),
+                testTenant.getId(),
+                testLandlordProfile.getId(),
+                10,
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusYears(1),
+                new BigDecimal("1500.00"),
+                null,
+                null
         );
 
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
@@ -130,6 +180,7 @@ class LeaseServiceTest {
         Lease lease = new Lease();
         lease.setProperty(testProperty);
         lease.setTenant(testTenant);
+        lease.setLandlordProfile(testLandlordProfile);
         lease.setPaymentDueDay(10);
         Lease activeLease = leaseRepository.save(lease);
 
@@ -160,6 +211,7 @@ class LeaseServiceTest {
         Lease lease = new Lease();
         lease.setProperty(testProperty);
         lease.setTenant(testTenant);
+        lease.setLandlordProfile(testLandlordProfile);
         lease.setPaymentDueDay(10);
         Lease activeLease = leaseRepository.save(lease);
 

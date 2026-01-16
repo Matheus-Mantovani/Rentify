@@ -41,7 +41,7 @@ public class PaymentService {
     }
 
     @Transactional(readOnly = true)
-    public List<PaymentResponseDTO> getAll(Long leaseId, Long tenantId) {
+    public List<PaymentResponseDTO> getAll(Long leaseId, Long tenantId, Long landlordProfileId) {
         List<Payment> payments;
 
         if (leaseId != null) {
@@ -51,6 +51,8 @@ public class PaymentService {
             payments = paymentRepository.findByLeaseIdOrderByPaymentDateDesc(leaseId);
         } else if (tenantId != null) {
             payments = paymentRepository.findByLeaseTenantIdOrderByPaymentDateDesc(tenantId);
+        } else if (landlordProfileId != null) {
+            payments = paymentRepository.findByLandlordProfileId(landlordProfileId);
         } else {
             payments = paymentRepository.findAll(Sort.by(Sort.Direction.DESC, "paymentDate"));
         }

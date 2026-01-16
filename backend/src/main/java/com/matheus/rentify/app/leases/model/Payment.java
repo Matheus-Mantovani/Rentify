@@ -19,7 +19,7 @@ public class Payment {
     @Column(name = "payment_id", nullable = false)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lease_fk", nullable = false)
     private Lease lease;
 

@@ -15,7 +15,8 @@ public abstract class LandlordProfileMapper {
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "user", ignore = true),
             @Mapping(target = "createdAt", ignore = true),
-            @Mapping(target = "updatedAt", ignore = true)
+            @Mapping(target = "updatedAt", ignore = true),
+            @Mapping(target = "deletedAt", ignore = true)
     })
     public abstract LandlordProfile toEntity(LandlordProfileRequestDTO dto);
 
@@ -25,7 +26,8 @@ public abstract class LandlordProfileMapper {
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "user", ignore = true),
             @Mapping(target = "createdAt", ignore = true),
-            @Mapping(target = "updatedAt", ignore = true)
+            @Mapping(target = "updatedAt", ignore = true),
+            @Mapping(target = "deletedAt", ignore = true)
     })
     public abstract void updateEntityFromDto(LandlordProfileRequestDTO dto, @MappingTarget LandlordProfile entity);
 }

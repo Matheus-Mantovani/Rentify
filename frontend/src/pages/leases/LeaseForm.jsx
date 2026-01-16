@@ -1,22 +1,26 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { 
-  ArrowLeft, Save, Building2, User, Calendar, DollarSign, Calculator 
+  ArrowLeft, Save, Building2, User, Calendar, DollarSign, Briefcase 
 } from 'lucide-react';
 import { leaseService } from '../../services/leaseService';
 import { propertyService } from '../../services/propertyService';
 import { tenantService } from '../../services/tenantService';
+import { landlordService } from '../../services/landlordService';
 
 export default function LeaseForm() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const location = useLocation();
+  
   const isEditMode = !!id;
+  
+  const preselectedTenantId = location.state?.preselectedTenantId || '';
 
-  {/* State Management */}
   const [formData, setFormData] = useState({
     propertyId: '',
-    tenantId: '',
-    landlordName: '',
+    tenantId: preselectedTenantId,
+    landlordProfileId: '',
     startDate: new Date().toISOString().split('T')[0],
     endDate: '',
     paymentDueDay: '10',
@@ -27,26 +31,28 @@ export default function LeaseForm() {
 
   const [properties, setProperties] = useState([]);
   const [tenants, setTenants] = useState([]);
+  const [landlords, setLandlords] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fetchingData, setFetchingData] = useState(true);
 
-  {/* Initialization */}
   useEffect(() => {
     const loadResources = async () => {
       try {
-        const tenantsData = await tenantService.getAllTenants();
-        setTenants(tenantsData);
+        const [tenantsData, allProperties, landlordsData] = await Promise.all([
+            tenantService.getAllTenants(),
+            propertyService.getAllProperties(),
+            landlordService.getAllLandlords()
+        ]);
 
-        const allProperties = await propertyService.getAllProperties();
-        
+        setTenants(tenantsData);
+        setLandlords(landlordsData);
+
         if (isEditMode) {
-            // In edit mode, we fetch the lease and allow the current property even if rented
             const lease = await leaseService.getLeaseById(id);
-            // Populate Form
             setFormData({
                 propertyId: lease.property.id,
                 tenantId: lease.tenant.id,
-                landlordName: lease.landlordName || '',
+                landlordProfileId: lease.landlordProfile?.id || '',
                 startDate: lease.startDate,
                 endDate: lease.endDate,
                 paymentDueDay: lease.paymentDueDay,
@@ -58,6 +64,15 @@ export default function LeaseForm() {
             setProperties(validProperties);
         } else {
             setProperties(allProperties.filter(p => p.status === 'AVAILABLE'));
+            
+            if (preselectedTenantId) {
+                setFormData(prev => ({ ...prev, tenantId: preselectedTenantId }));
+            }
+
+            const defaultLandlord = landlordsData.find(l => l.isDefault);
+            if (defaultLandlord) {
+                setFormData(prev => ({ ...prev, landlordProfileId: defaultLandlord.id }));
+            }
         }
 
       } catch (err) {
@@ -68,9 +83,8 @@ export default function LeaseForm() {
       }
     };
     loadResources();
-  }, [id, isEditMode]);
+  }, [id, isEditMode, preselectedTenantId]);
 
-  {/* Smart Handlers */}
   const handlePropertyChange = (propId) => {
     const property = properties.find(p => p.id === parseInt(propId));
     
@@ -98,11 +112,14 @@ export default function LeaseForm() {
             ...formData,
             propertyId: parseInt(formData.propertyId),
             tenantId: parseInt(formData.tenantId),
+            landlordProfileId: parseInt(formData.landlordProfileId),
             paymentDueDay: parseInt(formData.paymentDueDay),
             baseRentValue: parseFloat(formData.baseRentValue),
             securityDepositValue: formData.securityDepositValue ? parseFloat(formData.securityDepositValue) : null,
             paintingFeeValue: formData.paintingFeeValue ? parseFloat(formData.paintingFeeValue) : null,
         };
+
+        delete payload.landlordName;
 
         if (isEditMode) {
             await leaseService.updateLease(id, payload);
@@ -173,7 +190,8 @@ export default function LeaseForm() {
                         required
                         value={formData.tenantId}
                         onChange={(e) => setFormData({...formData, tenantId: e.target.value})}
-                        className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
+                        className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white disabled:bg-slate-100 disabled:text-slate-500"
+                        disabled={!!preselectedTenantId}
                     >
                         <option value="">Selecione o inquilino...</option>
                         {tenants.map(t => (
@@ -182,15 +200,28 @@ export default function LeaseForm() {
                     </select>
                 </div>
 
-                <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Nome do Locador (Proprietário)</label>
-                    <input 
-                        type="text"
-                        value={formData.landlordName}
-                        onChange={(e) => setFormData({...formData, landlordName: e.target.value})}
-                        placeholder="Ex: Carlos Souza"
-                        className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    />
+                {/* Landlord Select */}
+                <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-1 items-center gap-2">
+                        <Briefcase className="w-4 h-4 text-slate-400" />
+                        Locador (Proprietário do Contrato) *
+                    </label>
+                    <select
+                        required
+                        value={formData.landlordProfileId}
+                        onChange={(e) => setFormData({...formData, landlordProfileId: e.target.value})}
+                        className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
+                    >
+                        <option value="">Selecione o perfil do locador...</option>
+                        {landlords.map(l => (
+                            <option key={l.id} value={l.id}>
+                                {l.profileAlias} — {l.fullName} {l.isDefault ? '(Padrão)' : ''}
+                            </option>
+                        ))}
+                    </select>
+                    <p className="text-xs text-slate-500 mt-1">
+                        Selecione qual identidade legal assinará este contrato. <a href="/dashboard/landlords/new" className="text-blue-600 hover:underline">Criar novo perfil</a>
+                    </p>
                 </div>
             </div>
         </div>

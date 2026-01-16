@@ -41,12 +41,13 @@ public class PaymentController {
     }
 
     @GetMapping
-    @Operation(summary = "Get all payments, optionally filtered by leaseId or tenantId")
+    @Operation(summary = "Get all payments, optionally filtered by leaseId, tenantId or landlordProfileId")
     public ResponseEntity<List<PaymentResponseDTO>> getAllPayments(
             @RequestParam(required = false) Long leaseId,
-            @RequestParam(required = false) Long tenantId
+            @RequestParam(required = false) Long tenantId,
+            @RequestParam(required = false) Long landlordProfileId
     ) {
-        List<PaymentResponseDTO> payments = paymentService.getAll(leaseId, tenantId);
+        List<PaymentResponseDTO> payments = paymentService.getAll(leaseId, tenantId, landlordProfileId);
         return ResponseEntity.ok(payments);
     }
 
