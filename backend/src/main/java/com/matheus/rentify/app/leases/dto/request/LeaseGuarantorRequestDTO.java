@@ -24,10 +24,6 @@ public record LeaseGuarantorRequestDTO(
         @NotNull(message = "Guarantor ID cannot be null.")
         Long guarantorId,
 
-        @Schema(description = "Type of guarantee being provided.", example = "GUARANTOR_WITH_PROPERTY", requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotNull(message = "Guarantee type cannot be null.")
-        GuaranteeTypeEnum guaranteeType,
-
         @Schema(description = "The date the guarantor officially signed the contract. Cannot be in the future.", example = "2025-10-08")
         @PastOrPresent(message = "Signature date cannot be in the future.")
         LocalDate signatureDate,

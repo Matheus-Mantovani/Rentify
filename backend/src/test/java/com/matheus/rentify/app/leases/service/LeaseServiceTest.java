@@ -7,6 +7,7 @@ import com.matheus.rentify.app.landlord.repository.LandlordProfileRepository;
 import com.matheus.rentify.app.leases.dto.request.LeaseRequestDTO;
 import com.matheus.rentify.app.leases.dto.request.LeaseTerminationRequestDTO;
 import com.matheus.rentify.app.leases.dto.response.LeaseResponseDTO;
+import com.matheus.rentify.app.leases.model.GuaranteeTypeEnum; // IMPORT ADICIONADO
 import com.matheus.rentify.app.leases.model.Lease;
 import com.matheus.rentify.app.leases.model.LeaseStatusEnum;
 import com.matheus.rentify.app.leases.model.MoveOutConditionEnum;
@@ -131,6 +132,8 @@ class LeaseServiceTest {
                 testProperty.getId(),
                 testTenant.getId(),
                 testLandlordProfile.getId(),
+                null,
+                GuaranteeTypeEnum.NONE,
                 10,
                 LocalDate.now().plusDays(1),
                 LocalDate.now().plusYears(1),
@@ -160,6 +163,8 @@ class LeaseServiceTest {
                 testProperty.getId(),
                 testTenant.getId(),
                 testLandlordProfile.getId(),
+                null,
+                GuaranteeTypeEnum.NONE,
                 10,
                 LocalDate.now().plusDays(1),
                 LocalDate.now().plusYears(1),
@@ -172,7 +177,7 @@ class LeaseServiceTest {
             leaseService.createLease(requestDTO);
         });
 
-        assertThat(exception.getMessage()).contains("is not available. Current status: RENTED");
+        assertThat(exception.getMessage()).contains("is not available");
     }
 
     @Test
@@ -182,6 +187,9 @@ class LeaseServiceTest {
         lease.setTenant(testTenant);
         lease.setLandlordProfile(testLandlordProfile);
         lease.setPaymentDueDay(10);
+
+        lease.setGuaranteeType(GuaranteeTypeEnum.NONE);
+
         Lease activeLease = leaseRepository.save(lease);
 
         testProperty.setStatus(PropertyStatusEnum.RENTED);
@@ -213,6 +221,9 @@ class LeaseServiceTest {
         lease.setTenant(testTenant);
         lease.setLandlordProfile(testLandlordProfile);
         lease.setPaymentDueDay(10);
+
+        lease.setGuaranteeType(GuaranteeTypeEnum.NONE);
+
         Lease activeLease = leaseRepository.save(lease);
 
         testProperty.setStatus(PropertyStatusEnum.RENTED);

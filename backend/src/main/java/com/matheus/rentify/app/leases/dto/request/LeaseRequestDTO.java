@@ -1,5 +1,6 @@
 package com.matheus.rentify.app.leases.dto.request;
 
+import com.matheus.rentify.app.leases.model.GuaranteeTypeEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 
@@ -22,6 +23,13 @@ public record LeaseRequestDTO(
         @Schema(description = "ID of the landlord profile signing the lease.", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "Landlord Profile ID cannot be null.")
         Long landlordProfileId,
+
+        @Schema(description = "ID of the guarantor (optional, used only if guaranteeType is GUARANTOR).", example = "101")
+        Long guarantorId,
+
+        @Schema(description = "Type of guarantee provided for this contract.", example = "GUARANTOR")
+        @NotNull(message = "Guarantee Type cannot be null.")
+        GuaranteeTypeEnum guaranteeType,
 
         @Schema(description = "Day of the month the payment is due (1-31).", example = "10", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "Payment due day cannot be null.")

@@ -1,6 +1,7 @@
 package com.matheus.rentify.app.leases.dto.response;
 
 import com.matheus.rentify.app.landlord.dto.response.LandlordProfileResponseDTO;
+import com.matheus.rentify.app.leases.model.GuaranteeTypeEnum;
 import com.matheus.rentify.app.leases.model.LeaseStatusEnum;
 import com.matheus.rentify.app.leases.model.MoveOutConditionEnum;
 import com.matheus.rentify.app.people.dto.response.TenantDetailsResponseDTO;
@@ -45,6 +46,9 @@ public record LeaseResponseDTO(
 
         @Schema(description = "Base monthly rent value.", example = "2200.50")
         BigDecimal baseRentValue,
+
+        @Schema(description = "Type of guarantee provided for this lease.", example = "SECURITY_DEPOSIT")
+        GuaranteeTypeEnum guaranteeType,
 
         @Schema(description = "Value of the security deposit, if any.", example = "4401.00")
         BigDecimal securityDepositValue,

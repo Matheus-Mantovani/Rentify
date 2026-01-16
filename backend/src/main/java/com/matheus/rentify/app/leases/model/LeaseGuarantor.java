@@ -28,10 +28,6 @@ public class LeaseGuarantor {
     @JoinColumn(name = "guarantor_fk", nullable = false)
     private Guarantor guarantor;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "guarantee_type", nullable = false)
-    private GuaranteeTypeEnum guaranteeType;
-
     @Column(name = "signature_date")
     private LocalDate signatureDate;
 

@@ -40,6 +40,10 @@ public class Lease {
     @Column(name = "payment_due_day")
     private int paymentDueDay;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "guarantee_type", nullable = false)
+    private GuaranteeTypeEnum guaranteeType;
+
     @Column(name = "start_date")
     private LocalDate startDate;
 

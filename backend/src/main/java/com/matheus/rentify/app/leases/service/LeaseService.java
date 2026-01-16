@@ -1,12 +1,11 @@
 package com.matheus.rentify.app.leases.service;
 
+import com.matheus.rentify.app.leases.dto.request.LeaseGuarantorRequestDTO;
 import com.matheus.rentify.app.leases.dto.request.LeaseRequestDTO;
 import com.matheus.rentify.app.leases.dto.request.LeaseTerminationRequestDTO;
 import com.matheus.rentify.app.leases.dto.response.LeaseResponseDTO;
 import com.matheus.rentify.app.leases.mapper.LeaseMapper;
-import com.matheus.rentify.app.leases.model.Lease;
-import com.matheus.rentify.app.leases.model.LeaseStatusEnum;
-import com.matheus.rentify.app.leases.model.MoveOutConditionEnum;
+import com.matheus.rentify.app.leases.model.*;
 import com.matheus.rentify.app.leases.repository.LeaseRepository;
 import com.matheus.rentify.app.properties.model.Property;
 import com.matheus.rentify.app.properties.model.PropertyStatusEnum;
@@ -17,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -25,30 +25,53 @@ public class LeaseService {
     private final LeaseRepository leaseRepository;
     private final PropertyRepository propertyRepository;
     private final LeaseMapper leaseMapper;
+    private final LeaseGuarantorService leaseGuarantorService;
 
     @Autowired
-    public LeaseService(LeaseRepository leaseRepository, PropertyRepository propertyRepository, LeaseMapper leaseMapper) {
+    public LeaseService(LeaseRepository leaseRepository,
+                        PropertyRepository propertyRepository,
+                        LeaseMapper leaseMapper,
+                        LeaseGuarantorService leaseGuarantorService) {
         this.leaseRepository = leaseRepository;
         this.propertyRepository = propertyRepository;
         this.leaseMapper = leaseMapper;
+        this.leaseGuarantorService = leaseGuarantorService;
     }
 
     @Transactional
     public LeaseResponseDTO createLease(LeaseRequestDTO requestDTO) {
         Lease lease = leaseMapper.toEntity(requestDTO);
-        Property property = findPropertyByIdOrThrow(requestDTO.propertyId());
 
+        Property property = findPropertyByIdOrThrow(requestDTO.propertyId());
         if (property.getStatus() != PropertyStatusEnum.AVAILABLE) {
-            throw new IllegalStateException("Property with id: " + property.getId() + " is not available. Current status: " + property.getStatus());
+            throw new IllegalStateException("Property not available: " + property.getStatus());
         }
 
         snapshotLandlordName(lease);
-
         updateMonetaryWords(lease);
 
         Lease savedLease = leaseRepository.save(lease);
+
         property.setStatus(PropertyStatusEnum.RENTED);
         propertyRepository.save(property);
+
+        if (requestDTO.guaranteeType() == GuaranteeTypeEnum.GUARANTOR) {
+            if (requestDTO.guarantorId() == null) {
+                throw new IllegalArgumentException("Guarantor ID is mandatory when Guarantee Type is GUARANTOR");
+            }
+
+            LeaseGuarantorRequestDTO linkDTO = new LeaseGuarantorRequestDTO(
+                    savedLease.getId(),
+                    requestDTO.guarantorId(),
+                    LocalDate.now(),
+                    LeaseGuarantorStatusEnum.ACTIVE,
+                    null,
+                    null,
+                    "Linked automatically during lease creation"
+            );
+
+            leaseGuarantorService.createLeaseGuarantor(linkDTO);
+        }
 
         return leaseMapper.toResponseDTO(savedLease);
     }
@@ -89,10 +112,12 @@ public class LeaseService {
         leaseMapper.updateEntityFromDto(requestDTO, existingLease);
 
         snapshotLandlordName(existingLease);
-
         updateMonetaryWords(existingLease);
 
         Lease updatedLease = leaseRepository.save(existingLease);
+
+        // NOTE: Updating the Guarantor link on update is complex (remove old? add new?).
+        // For now, we assume guarantor changes are handled via the specific /lease-guarantors endpoints.
 
         return leaseMapper.toResponseDTO(updatedLease);
     }
