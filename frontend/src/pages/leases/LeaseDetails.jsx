@@ -2,23 +2,25 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Building2, User, Calendar, DollarSign, 
-  Shield, CheckCircle, XCircle, AlertTriangle, Edit, Ban, Trash2, Plus
+  Shield, CheckCircle, XCircle, Ban, Edit, Plus
 } from 'lucide-react';
 import { leaseService } from '../../services/leaseService';
 import { leaseGuarantorService } from '../../services/leaseGuarantorService';
 import LeaseTerminationModal from './LeaseTerminationModal';
+import AddGuarantorModal from './AddGuarantorModal'; // Novo Import
 
 export default function LeaseDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  {/* State Management */}
   const [lease, setLease] = useState(null);
   const [guarantors, setGuarantors] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // Modals State
   const [showTerminateModal, setShowTerminateModal] = useState(false);
+  const [showAddGuarantorModal, setShowAddGuarantorModal] = useState(false);
 
-  {/* Data Loading */}
   const loadData = async () => {
     setLoading(true);
     try {
@@ -41,7 +43,6 @@ export default function LeaseDetails() {
     loadData();
   }, [id]);
 
-  {/* Helpers */}
   const formatMoney = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0);
   const formatDate = (dateStr) => dateStr ? new Date(dateStr).toLocaleDateString('pt-BR') : '-';
 
@@ -49,6 +50,17 @@ export default function LeaseDetails() {
     if (status === 'ACTIVE') return <span className="flex items-center gap-1.5 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-bold"><CheckCircle className="w-4 h-4"/> Ativo</span>;
     if (status === 'TERMINATED') return <span className="flex items-center gap-1.5 px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-sm font-bold"><XCircle className="w-4 h-4"/> Encerrado</span>;
     return <span className="px-3 py-1 bg-gray-100 rounded-full text-sm">{status}</span>;
+  };
+
+  const getGuaranteeLabel = (type) => {
+      switch(type) {
+          case 'GUARANTOR': return 'Fiador';
+          case 'SECURITY_DEPOSIT': return 'Caução';
+          case 'LEASE_INSURANCE': return 'Seguro Fiança';
+          case 'CAPITALIZATION_BOND': return 'Título Capitalização';
+          case 'NONE': return 'Sem Garantia';
+          default: return type;
+      }
   };
 
   if (loading) return <div className="flex justify-center items-center h-screen"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div></div>;
@@ -67,6 +79,9 @@ export default function LeaseDetails() {
             <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-bold text-slate-900">Contrato #{lease.id}</h1>
                 {getStatusBadge(lease.status)}
+                <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-semibold border border-blue-100">
+                    {getGuaranteeLabel(lease.guaranteeType)}
+                </span>
             </div>
             <p className="text-slate-500 text-sm mt-1">
                 {lease.property.address} • {lease.tenant.fullName}
@@ -147,7 +162,9 @@ export default function LeaseDetails() {
                     </div>
                     <div>
                         <span className="block text-xs text-slate-500 mb-1">Caução</span>
-                        <div className="font-medium text-slate-900">{lease.securityDepositValue ? formatMoney(lease.securityDepositValue) : '-'}</div>
+                        <div className="font-medium text-slate-900">
+                            {lease.guaranteeType === 'SECURITY_DEPOSIT' ? formatMoney(lease.securityDepositValue) : '-'}
+                        </div>
                     </div>
                 </div>
 
@@ -158,7 +175,7 @@ export default function LeaseDetails() {
                 )}
             </div>
 
-            {/* Termination Info (Conditional) */}
+            {/* Termination Info */}
             {lease.status === 'TERMINATED' && (
                 <div className="bg-red-50 p-6 rounded-xl border border-red-100">
                     <h3 className="text-xs font-bold text-red-400 uppercase tracking-wider mb-4 flex items-center gap-2">
@@ -193,9 +210,9 @@ export default function LeaseDetails() {
                     <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
                         <Shield className="w-4 h-4" /> Garantias (Fiadores)
                     </h3>
-                    {lease.status === 'ACTIVE' && (
+                    {lease.status === 'ACTIVE' && lease.guaranteeType === 'GUARANTOR' && (
                         <button 
-                            onClick={() => alert("Funcionalidade de adicionar fiador será implementada em breve!")} 
+                            onClick={() => setShowAddGuarantorModal(true)} 
                             className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded hover:bg-blue-100 transition-colors flex items-center gap-1"
                         >
                             <Plus className="w-3 h-3" /> Adicionar
@@ -205,20 +222,23 @@ export default function LeaseDetails() {
 
                 {guarantors.length === 0 ? (
                     <div className="text-center py-8 text-slate-400 text-sm border-2 border-dashed border-slate-100 rounded-lg">
-                        Nenhum fiador vinculado.
+                        {lease.guaranteeType === 'GUARANTOR' 
+                            ? 'Nenhum fiador vinculado.' 
+                            : `Garantia definida como ${getGuaranteeLabel(lease.guaranteeType)}`
+                        }
                     </div>
                 ) : (
                     <div className="space-y-4">
                         {guarantors.map(g => (
-                            <div key={g.id} className="p-3 border border-slate-100 rounded-lg bg-slate-50 hover:border-blue-200 transition-colors">
+                            <div key={g.id} className="p-3 border border-slate-100 rounded-lg bg-slate-50 hover:border-blue-200 transition-colors group relative">
                                 <div className="flex justify-between items-start">
                                     <div>
                                         <p className="font-bold text-slate-900 text-sm">{g.guarantor.fullName}</p>
-                                        <p className="text-xs text-slate-500 mt-0.5">{g.guaranteeType?.replace(/_/g, ' ')}</p>
+                                        <p className="text-xs text-slate-500 mt-0.5">Assinou em: {formatDate(g.signatureDate)}</p>
                                     </div>
-                                    <div className="text-right">
-                                        {g.guaranteeValue && <p className="text-xs font-medium text-slate-700">{formatMoney(g.guaranteeValue)}</p>}
-                                    </div>
+                                    
+                                    {/* Opção futura para remover fiador (pode ser implementada depois) */}
+                                    {/* <button className="opacity-0 group-hover:opacity-100 p-1 text-red-400 hover:text-red-600"><Trash2 className="w-3 h-3"/></button> */}
                                 </div>
                                 <div className="mt-2 text-xs text-slate-400 flex flex-col gap-0.5">
                                     <span>{g.guarantor.email}</span>
@@ -245,6 +265,15 @@ export default function LeaseDetails() {
         <LeaseTerminationModal 
             leaseId={lease.id}
             onClose={() => setShowTerminateModal(false)}
+            onSuccess={() => loadData()}
+        />
+      )}
+
+      {showAddGuarantorModal && (
+        <AddGuarantorModal 
+            leaseId={lease.id}
+            existingGuarantors={guarantors}
+            onClose={() => setShowAddGuarantorModal(false)}
             onSuccess={() => loadData()}
         />
       )}

@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { 
-  ArrowLeft, Save, Building2, User, Calendar, DollarSign, Briefcase 
+  ArrowLeft, Save, Building2, User, Calendar, DollarSign, Briefcase, ShieldCheck 
 } from 'lucide-react';
 import { leaseService } from '../../services/leaseService';
 import { propertyService } from '../../services/propertyService';
 import { tenantService } from '../../services/tenantService';
 import { landlordService } from '../../services/landlordService';
+import { guarantorService } from '../../services/guarantorService';
+import { leaseGuarantorService } from '../../services/leaseGuarantorService';
 
 export default function LeaseForm() {
   const navigate = useNavigate();
@@ -14,7 +16,6 @@ export default function LeaseForm() {
   const location = useLocation();
   
   const isEditMode = !!id;
-  
   const preselectedTenantId = location.state?.preselectedTenantId || '';
 
   const [formData, setFormData] = useState({
@@ -25,30 +26,49 @@ export default function LeaseForm() {
     endDate: '',
     paymentDueDay: '10',
     baseRentValue: '',
+    paintingFeeValue: '',
+    guaranteeType: 'NONE',
     securityDepositValue: '',
-    paintingFeeValue: ''
+    selectedGuarantorId: '' 
   });
 
   const [properties, setProperties] = useState([]);
   const [tenants, setTenants] = useState([]);
   const [landlords, setLandlords] = useState([]);
+  const [guarantors, setGuarantors] = useState([]);
+  
   const [loading, setLoading] = useState(false);
   const [fetchingData, setFetchingData] = useState(true);
 
   useEffect(() => {
     const loadResources = async () => {
       try {
-        const [tenantsData, allProperties, landlordsData] = await Promise.all([
+        const [tenantsData, allProperties, landlordsData, guarantorsData] = await Promise.all([
             tenantService.getAllTenants(),
             propertyService.getAllProperties(),
-            landlordService.getAllLandlords()
+            landlordService.getAllLandlords(),
+            guarantorService.getAllGuarantors()
         ]);
 
         setTenants(tenantsData);
         setLandlords(landlordsData);
+        setGuarantors(guarantorsData);
 
         if (isEditMode) {
             const lease = await leaseService.getLeaseById(id);
+            
+            let currentType = lease.guaranteeType || 'NONE';
+            let currentGuarantorId = '';
+
+            if (currentType === 'GUARANTOR') {
+                try {
+                    const leaseGuarantors = await leaseGuarantorService.getGuarantorsForLease(id);
+                    if (leaseGuarantors && leaseGuarantors.length > 0) {
+                        currentGuarantorId = leaseGuarantors[0].guarantor.id;
+                    }
+                } catch (ignore) { }
+            }
+
             setFormData({
                 propertyId: lease.property.id,
                 tenantId: lease.tenant.id,
@@ -57,9 +77,12 @@ export default function LeaseForm() {
                 endDate: lease.endDate,
                 paymentDueDay: lease.paymentDueDay,
                 baseRentValue: lease.baseRentValue,
+                paintingFeeValue: lease.paintingFeeValue || '',
+                guaranteeType: currentType,
                 securityDepositValue: lease.securityDepositValue || '',
-                paintingFeeValue: lease.paintingFeeValue || ''
+                selectedGuarantorId: currentGuarantorId
             });
+
             const validProperties = allProperties.filter(p => p.status === 'AVAILABLE' || p.id === lease.property.id);
             setProperties(validProperties);
         } else {
@@ -87,7 +110,6 @@ export default function LeaseForm() {
 
   const handlePropertyChange = (propId) => {
     const property = properties.find(p => p.id === parseInt(propId));
-    
     setFormData(prev => ({
         ...prev,
         propertyId: propId,
@@ -108,23 +130,32 @@ export default function LeaseForm() {
     e.preventDefault();
     setLoading(true);
     try {
-        const payload = {
-            ...formData,
+        const depositValue = formData.guaranteeType === 'SECURITY_DEPOSIT' 
+            ? parseFloat(formData.securityDepositValue) 
+            : null;
+
+        const guarantorIdValue = formData.guaranteeType === 'GUARANTOR' && formData.selectedGuarantorId
+            ? parseInt(formData.selectedGuarantorId)
+            : null;
+
+        const leasePayload = {
             propertyId: parseInt(formData.propertyId),
             tenantId: parseInt(formData.tenantId),
             landlordProfileId: parseInt(formData.landlordProfileId),
+            startDate: formData.startDate,
+            endDate: formData.endDate,
             paymentDueDay: parseInt(formData.paymentDueDay),
             baseRentValue: parseFloat(formData.baseRentValue),
-            securityDepositValue: formData.securityDepositValue ? parseFloat(formData.securityDepositValue) : null,
             paintingFeeValue: formData.paintingFeeValue ? parseFloat(formData.paintingFeeValue) : null,
+            guaranteeType: formData.guaranteeType,
+            securityDepositValue: depositValue,
+            guarantorId: guarantorIdValue
         };
 
-        delete payload.landlordName;
-
         if (isEditMode) {
-            await leaseService.updateLease(id, payload);
+            await leaseService.updateLease(id, leasePayload);
         } else {
-            await leaseService.createLease(payload);
+            await leaseService.createLease(leasePayload);
         }
         
         navigate('/dashboard/leases');
@@ -141,7 +172,7 @@ export default function LeaseForm() {
   return (
     <div className="p-6 max-w-5xl mx-auto">
       
-      {/* Header */}
+      {/* HEADER */}
       <div className="flex items-center gap-4 mb-8">
         <button onClick={() => navigate('/dashboard/leases')} className="p-2 hover:bg-slate-100 rounded-full">
             <ArrowLeft className="w-6 h-6 text-slate-600" />
@@ -219,9 +250,6 @@ export default function LeaseForm() {
                             </option>
                         ))}
                     </select>
-                    <p className="text-xs text-slate-500 mt-1">
-                        Selecione qual identidade legal assinará este contrato. <a href="/dashboard/landlords/new" className="text-blue-600 hover:underline">Criar novo perfil</a>
-                    </p>
                 </div>
             </div>
         </div>
@@ -281,13 +309,13 @@ export default function LeaseForm() {
             </div>
         </div>
 
-        {/* SECTION 3: FINANCIALS */}
+        {/* SECTION 3: FINANCIALS & GUARANTEES */}
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
             <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                <DollarSign className="w-4 h-4" /> Valores Financeiros
+                <DollarSign className="w-4 h-4" /> Valores e Garantias
             </h3>
             
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-2 gap-6">
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Valor do Aluguel Base *</label>
                     <div className="relative">
@@ -302,26 +330,10 @@ export default function LeaseForm() {
                             placeholder="0.00"
                         />
                     </div>
-                    <p className="text-xs text-slate-400 mt-1">Este valor será usado para gerar os pagamentos mensais.</p>
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Caução / Depósito</label>
-                    <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">R$</span>
-                        <input 
-                            type="number"
-                            step="0.01"
-                            value={formData.securityDepositValue}
-                            onChange={(e) => setFormData({...formData, securityDepositValue: e.target.value})}
-                            className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                            placeholder="0.00"
-                        />
-                    </div>
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Taxa de Pintura</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Taxa de Pintura (Opcional)</label>
                     <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">R$</span>
                         <input 
@@ -335,9 +347,82 @@ export default function LeaseForm() {
                     </div>
                 </div>
             </div>
+
+            {/* Guarantee Section */}
+            <div className="mt-8 pt-6 border-t border-slate-100">
+                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4" /> Modalidade de Garantia
+                </h3>
+                
+                <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Tipo de Garantia *</label>
+                        <select
+                            value={formData.guaranteeType}
+                            onChange={(e) => setFormData({...formData, guaranteeType: e.target.value, securityDepositValue: '', selectedGuarantorId: ''})}
+                            className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
+                        >
+                            <option value="NONE">Sem Garantia / Outra</option>
+                            <option value="SECURITY_DEPOSIT">Caução (Depósito em Dinheiro)</option>
+                            <option value="GUARANTOR">Fiador (Pessoa Física)</option>
+                            <option value="LEASE_INSURANCE">Seguro Fiança</option>
+                            <option value="CAPITALIZATION_BOND">Título de Capitalização</option>
+                        </select>
+                        <p className="text-xs text-slate-500 mt-1">A lei proíbe exigir mais de uma modalidade de garantia no mesmo contrato.</p>
+                    </div>
+
+                    {/* 1. Security Deposit */}
+                    {formData.guaranteeType === 'SECURITY_DEPOSIT' && (
+                        <div className="animate-in fade-in slide-in-from-top-2">
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Valor da Caução (3 meses) *</label>
+                            <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-bold">R$</span>
+                                <input 
+                                    type="number"
+                                    step="0.01"
+                                    required
+                                    value={formData.securityDepositValue}
+                                    onChange={(e) => setFormData({...formData, securityDepositValue: e.target.value})}
+                                    className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-blue-50 text-blue-900 font-medium"
+                                    placeholder="0.00"
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 2. Guarantor */}
+                    {formData.guaranteeType === 'GUARANTOR' && (
+                        <div className="animate-in fade-in slide-in-from-top-2">
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Selecione o Fiador *</label>
+                            <select
+                                required={!isEditMode} 
+                                value={formData.selectedGuarantorId}
+                                onChange={(e) => setFormData({...formData, selectedGuarantorId: e.target.value})}
+                                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
+                            >
+                                <option value="">Selecione um fiador cadastrado...</option>
+                                {guarantors.map(g => (
+                                    <option key={g.id} value={g.id}>{g.fullName} (CPF: {g.cpf})</option>
+                                ))}
+                            </select>
+                            <div className="mt-2 flex justify-between text-xs">
+                                <span className="text-slate-500">Não encontrou?</span>
+                                <a href="/dashboard/guarantors/new" target="_blank" className="text-blue-600 hover:underline">Cadastrar novo fiador</a>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 3. Others */}
+                    {(formData.guaranteeType === 'LEASE_INSURANCE' || formData.guaranteeType === 'CAPITALIZATION_BOND') && (
+                        <div className="flex items-center p-4 bg-gray-50 border border-gray-200 rounded-lg text-gray-600 text-sm animate-in fade-in slide-in-from-top-2">
+                            <p>Os detalhes da apólice ou do título deverão ser anexados posteriormente na aba de "Documentos" do contrato.</p>
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
 
-        {/* Actions */}
+        {/* ACTIONS */}
         <div className="flex justify-end gap-4 pt-4">
             <button
                 type="button"

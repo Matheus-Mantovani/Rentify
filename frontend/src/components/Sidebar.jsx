@@ -26,9 +26,10 @@ export default function Sidebar({ isOpen }) {
   ];
 
   return (
-    <aside className={`${isOpen ? 'w-64' : 'w-20'} bg-white shadow-lg transition-all duration-300 flex flex-col`}>
+    <aside className={`${isOpen ? 'w-64' : 'w-20'} bg-white shadow-lg transition-all duration-300 flex flex-col h-screen sticky top-0 z-20`}>
+      
       {/* Logo Area */}
-      <div className="p-6 border-b">
+      <div className="p-6 border-b shrink-0">
         <div className="flex items-center justify-between">
           {isOpen ? (
             <div className="flex items-center space-x-2">
@@ -44,7 +45,7 @@ export default function Sidebar({ isOpen }) {
       </div>
 
       {/* Navigation Links */}
-      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
         {menuItems.map((item, idx) => {
           const isActive = location.pathname.startsWith(item.path) && (item.path === '/dashboard' ? location.pathname === '/dashboard' : true);
           return (
@@ -66,7 +67,7 @@ export default function Sidebar({ isOpen }) {
       </nav>
 
       {/* Footer Actions */}
-      <div className="p-4 border-t space-y-2">
+      <div className="p-4 border-t space-y-2 shrink-0 bg-white">
         <button 
           onClick={() => navigate('/dashboard/settings')}
           className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-50 transition-all"

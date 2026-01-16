@@ -6,6 +6,11 @@ export const guarantorService = {
     return response.data;
   },
 
+  getAllGuarantorsDetails: async () => {
+    const response = await api.get('/api/guarantors/details');
+    return response.data;
+  },
+
   getGuarantorById: async (id) => {
     const response = await api.get(`/api/guarantors/${id}`);
     return response.data;
